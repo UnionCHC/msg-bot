@@ -1,0 +1,10 @@
+{
+  "host": "localhost",
+  "port": 8082,
+
+  "server": "https://node1.unionchc.com",
+
+  "sqlite": {
+    "path": "/home/unionchc/database/unionchc.db"
+  }
+}

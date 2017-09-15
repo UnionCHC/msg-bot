@@ -1,0 +1,12 @@
+.*
+!.gitignore
+*.iml
+build
+gradle
+libs
+logs
+gradlew*
+out
+unionchc/src/main/resources/config.json
+unionchc/src/main/resources/logback.xml
+
