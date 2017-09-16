@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
 
 public class EthereumSer {
 
@@ -90,32 +91,6 @@ public class EthereumSer {
         return null;
     }
 
-
-    public String sendContract(String address, String contractAdr, String password) {
-        try {
-            BigInteger nonce = mWeb3.ethGetTransactionCount(
-                    address, DefaultBlockParameterName.LATEST).send().getTransactionCount();
-            System.out.println("nonce: " + nonce);
-
-            Function function = new Function("sendEvent", Collections.emptyList(), Collections.emptyList());
-            String encodedFunction = FunctionEncoder.encode(function);
-            Transaction transaction = Transaction.createFunctionCallTransaction(address, nonce,
-                    GAS_PRICE, GAS_LIMIT, contractAdr, encodedFunction);
-
-            EthSendTransaction result = mParity.personalSignAndSendTransaction(transaction, password).send();
-            System.out.println("transaction hash: " + result.getTransactionHash());
-            if (result.hasError()){
-                return "transaction hash: " + result.getError().getMessage();
-            } else
-            return "transaction hash: " + result.getTransactionHash();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
-
-
     public void sendMoney(String from, String to, String value, String password) {
         try {
             EthGetTransactionCount transactionCount = mWeb3.ethGetTransactionCount(from,
@@ -131,6 +106,35 @@ public class EthereumSer {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+
+    public String sendContract(String address, String contractAdr, String functionName, String password) {
+        try {
+            BigInteger nonce = mWeb3.ethGetTransactionCount(
+                    address, DefaultBlockParameterName.LATEST).send().getTransactionCount();
+            System.out.println("nonce: " + nonce);
+
+            Function function = new Function(functionName, Collections.emptyList(), Collections.emptyList());
+            String encodedFunction = FunctionEncoder.encode(function);
+            Transaction transaction = Transaction.createFunctionCallTransaction(address, nonce,
+                    GAS_PRICE, GAS_LIMIT, contractAdr, encodedFunction);
+
+            /*
+            EthSendTransaction result = mParity.personalSignAndSendTransaction(transaction, password).send();
+            System.out.println("transaction hash: " + result.getTransactionHash());
+            if (result.hasError()) {
+                return "transaction hash: " + result.getError().getMessage();
+            } else
+                return "transaction hash: " + result.getTransactionHash();
+            */
+            CompletableFuture<EthSendTransaction> result = mParity.personalSignAndSendTransaction(transaction, password).sendAsync();
+            System.out.println("transaction hash: " + result.toString());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 
 

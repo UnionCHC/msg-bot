@@ -7,6 +7,7 @@ libs
 logs
 gradlew*
 out
-unionchc/src/main/resources/config.json
-unionchc/src/main/resources/logback.xml
+src/main/resources/config.json
+src/main/resources/logback.xml
+
 

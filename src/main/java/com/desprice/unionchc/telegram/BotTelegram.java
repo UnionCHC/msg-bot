@@ -104,7 +104,11 @@ public class BotTelegram extends TelegramLongPollingBot {
                 else if (message.getText().equals(CALL_INFO))
                     getInfo(update);
                 else if (message.getText().equals(CALL_CONTRACT))
-                    callContract(update);
+                    callContract(update, "sendEvent");
+                else if (message.getText().equals(CALL_INC1))
+                    callContract(update, "incValue1");
+                else if (message.getText().equals(CALL_INC2))
+                    callContract(update, "incValue2");
                 else if (message.getText().equals("/help"))
                     sendMsg(message, "Привет", true);
                 else if (message.getText().equals("*"))
@@ -316,9 +320,10 @@ public class BotTelegram extends TelegramLongPollingBot {
     }
 
 
-    private void callContract(Update update) {
-        String result = EthereumSer.getInstance().sendContract(botUser.address, Constants.BOT_CONTRACT, botUser.password);
-        sendMsg(update.getMessage(), result, true);
+    private void callContract(Update update, String functionName) {
+        String result = EthereumSer.getInstance().sendContract(botUser.address, Constants.BOT_CONTRACT, functionName, botUser.password);
+       // sendMsg(update.getMessage(), result, true);
+        sendMsg(update.getMessage(), "Контракт отправлен", true);
     }
 
 
