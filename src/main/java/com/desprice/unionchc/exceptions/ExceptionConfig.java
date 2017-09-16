@@ -1,4 +1,4 @@
-package com.desprice.unionchc;
+package com.desprice.unionchc.exceptions;
 
 public class ExceptionConfig extends Exception {
 

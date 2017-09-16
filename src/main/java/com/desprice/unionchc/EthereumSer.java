@@ -1,5 +1,6 @@
 package com.desprice.unionchc;
 
+import com.desprice.unionchc.exceptions.ExceptionConfig;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.protocol.Web3j;
