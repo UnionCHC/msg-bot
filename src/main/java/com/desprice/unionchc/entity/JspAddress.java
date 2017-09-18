@@ -1,7 +1,9 @@
 package com.desprice.unionchc.entity;
 
-public class JspPassord {
+public class JspAddress {
 
+
+    public String address;
     public String password1;
     public String password2;
     public Long path1;

@@ -5,8 +5,8 @@ import com.desprice.unionchc.Constants;
 import com.desprice.unionchc.EthereumSer;
 import com.desprice.unionchc.Options;
 import com.desprice.unionchc.Utils;
-import com.desprice.unionchc.entity.UserBot;
 import com.desprice.unionchc.entity.Config;
+import com.desprice.unionchc.entity.UserBot;
 import com.desprice.unionchc.entity.UserStep;
 import com.desprice.unionchc.sqlite.TStep;
 import com.desprice.unionchc.sqlite.TUsers;
@@ -190,7 +190,6 @@ public class BotTelegram extends TelegramLongPollingBot {
 
     private void sendMsgCreate() {
         try {
-
             EditMessageText editMessage = new EditMessageText();
             editMessage.setChatId(userBot.userId.toString());
             editMessage.setMessageId(userBot.messageId.intValue());
@@ -206,8 +205,6 @@ public class BotTelegram extends TelegramLongPollingBot {
             sendMessage.setReplyMarkup(getMenuKeyboard());
             sendMessage.setText("Вам доступны команды");
             sendMessage(sendMessage);
-
-
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
@@ -243,15 +240,18 @@ public class BotTelegram extends TelegramLongPollingBot {
             InlineKeyboardButton button = new InlineKeyboardButton();
             button.setText("Новый");
             button.setCallbackData(DATA_START_NEW);
-
-            // button.setUrl("https://unionchc.com");
             button.setUrl(path);
-
 
             row.add(button);
             button = new InlineKeyboardButton();
             button.setText("Существующий");
             button.setCallbackData(DATA_START_EXISTS);
+
+            path = getPathWebUrl();
+            path += "telegram/address/" + messageIn.getChat().getId() +
+                    "/" + messageIn.getMessageId();
+            System.out.println(path);
+            button.setUrl(path);
             row.add(button);
 
             keyboard.add(row);
@@ -260,6 +260,8 @@ public class BotTelegram extends TelegramLongPollingBot {
 
             Message sendOk = sendMessage(sendMessage);
             System.out.println(sendOk.getMessageId());
+            userBot.messageId = sendOk.getMessageId().longValue();
+            TUsers.getInstance().setMessage(userBot);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
@@ -290,14 +292,16 @@ public class BotTelegram extends TelegramLongPollingBot {
                     TStep.getInstance().updateStep(userStep);
                     break;
                 case STEP_EXISTS_ADDRESS:
-
+                    /*
                     userBot.address = update.getMessage().getText();
                     tUsers.updateAddress(userBot);
                     userStep.step = Constants.STEP_PASSWORD;
                     TStep.getInstance().updateStep(userStep);
                     sendMsg(update.getMessage(), "Отправьте Ваш пароль", true);
                     break;
+                    */
                 case Constants.STEP_PASSWORD:
+                    /*
                     userBot.password = update.getMessage().getText();
                     if (null != userBot.address && !userBot.address.isEmpty()) {
                         if (EthereumSer.getInstance().checkUnlock(userBot.address, userBot.password))
@@ -313,6 +317,7 @@ public class BotTelegram extends TelegramLongPollingBot {
                     SendMessage sendMessage = initMessage(update.getMessage(), true);
                     sendMessage.setText("Пароль обновлен");
                     sendMessage.setReplyMarkup(getMenuKeyboard());
+                    */
                     break;
             }
         } catch (TelegramApiException e) {
@@ -333,7 +338,29 @@ public class BotTelegram extends TelegramLongPollingBot {
             }
         }
 */
+
+        if (userBot.verify == 0) {
+            userBot.address = EthereumSer.getInstance().createAccount(userBot.password);
+            userBot.verify = 1;
+            tUsers.updateVerify(userBot);
+        }
         sendMsgCreate();
+    }
+
+    public boolean checkAddress() {
+        TUsers tUsers = TUsers.getInstance();
+        //if (null != userBot.address && !userBot.address.isEmpty()) {
+        if (userBot.verify == 0) {
+            if (EthereumSer.getInstance().checkUnlock(userBot.address, userBot.password)) {
+                userBot.verify = 1;
+                tUsers.updateVerify(userBot);
+                return true;
+            } else {
+                // sendMsg(update.getMessage(), "Неверный пароль\n, Отправьте другой пароль", true);
+                return false;
+            }
+        }
+        return false;
     }
 
 

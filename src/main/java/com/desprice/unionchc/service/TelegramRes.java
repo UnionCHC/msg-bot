@@ -2,6 +2,7 @@ package com.desprice.unionchc.service;
 
 
 import com.desprice.unionchc.Utils;
+import com.desprice.unionchc.entity.JspAddress;
 import com.desprice.unionchc.entity.JspMessage;
 import com.desprice.unionchc.entity.JspPassord;
 import com.desprice.unionchc.entity.UserBot;
@@ -45,8 +46,22 @@ public class TelegramRes {
     @Produces(MediaType.TEXT_HTML)
     public Response getPassword(@PathParam("user") String userName, @PathParam("msg") String msg) {
 
-        //InputStream inputStream = getClass().getClassLoader().getResourceAsStream("/WEB-INF/jsp/password.html");
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("html/password.html");
+        String html = getResourceFile("html/password.html");
+        Response response = Response.ok(html).build();
+        return response;
+    }
+
+    @GET
+    @Path("address/{user:\\d+}/{msg:\\d+}")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getAddress(@PathParam("user") String userName, @PathParam("msg") String msg) {
+        String html = getResourceFile("html/address.html");
+        Response response = Response.ok(html).build();
+        return response;
+    }
+
+    private String getResourceFile(String fileName) {
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
 
         BufferedReader bReader = new BufferedReader(new InputStreamReader(inputStream));
         StringBuffer sb = new StringBuffer();
@@ -60,11 +75,8 @@ public class TelegramRes {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         //finally convert StringBuffer object to String!
-        String html = sb.toString();
-        Response response = Response.ok(html).build();
-        return response;
+        return sb.toString();
     }
 
     @POST
@@ -88,9 +100,6 @@ public class TelegramRes {
             try {
                 BotTelegram bot = new BotTelegram();
 
-                //param.path
-
-
                 UserBot userBot = TUsers.getInstance().getUser(param.path1);
                 userBot.password = param.password1;
                 userBot.messageId = param.path2;
@@ -105,21 +114,40 @@ public class TelegramRes {
     }
 
     @POST
-    @Path("/password/update1")
-    // @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/address/update/")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response passwordUpdate1(@FormParam("password1") String username, @FormParam("password2") String password, @FormParam("path") String path) {
+    public Response addressUpdate(@NotNull JspAddress param) {
 
-        LOGGER.debug("");
+        LOGGER.debug("passwordUpdate" + Utils.jsonToString(param));
 
-      /*  JspMessage messageInfo = new JspMessage();
-        try {
+        JspMessage messageInfo = new JspMessage();
 
+        if (!param.password1.equals(param.password2)) {
+            messageInfo.setStatus(Response.Status.PRECONDITION_FAILED);
+            messageInfo.setMessage("Пароли должны совпадать");
+        } else {
+            messageInfo.setStatus(Response.Status.OK);
+            messageInfo.setMessage("Update");
+            try {
+                BotTelegram bot = new BotTelegram();
 
-        } catch (Exception ex) {
-        }*/
-        //return Response.status(Response.Status.OK).entity(messageInfo).build();
-        return Response.status(Response.Status.OK).build();
+                UserBot userBot = TUsers.getInstance().getUser(param.path1);
+                userBot.address = param.address;
+                userBot.password = param.password1;
+                //userBot.messageId = param.path2;
+                bot.setUserBot(userBot);
+                if (!bot.checkAddress()) {
+                    messageInfo.setStatus(Response.Status.PRECONDITION_FAILED);
+                    messageInfo.setMessage("Неверный пароль или адрес");
+                } else {
+                    messageInfo.setStatus(Response.Status.OK);
+                    messageInfo.setMessage("");
+                }
+            } catch (Exception ex) {
+            }
+        }
+        return Response.status(Response.Status.OK).entity(messageInfo).build();
     }
 
 

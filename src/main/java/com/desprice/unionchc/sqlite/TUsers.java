@@ -92,15 +92,16 @@ public class TUsers {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 userBot.userId = rs.getLong(UserBot.USER_ID);
+                userBot.messageId = rs.getLong(UserBot.MESSAGE_ID);
+                userBot.verify = rs.getInt(UserBot.VERIFY);
                 userBot.firstName = rs.getString(UserBot.FIRSTNAME);
                 userBot.lastName = rs.getString(UserBot.LASTNAME);
                 userBot.userName = rs.getString(UserBot.USERNAME);
                 userBot.wallet = rs.getString(UserBot.WALLET);
                 userBot.address = rs.getString(UserBot.ADDRESS);
                 userBot.password = rs.getString(UserBot.PASSWORD);
-
                 System.out.println(rs.getLong(UserBot.USER_ID) + "\t" +
-                   rs.getString(UserBot.FIRSTNAME) + "\t");
+                        rs.getString(UserBot.FIRSTNAME) + "\t");
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -112,7 +113,7 @@ public class TUsers {
     public void updateWallet(UserBot user) {
         String sql = "UPDATE " + TABLE_USERS + " SET " +
                 UserBot.WALLET + " = ? " +
-                " WHERE "+ UserBot.USER_ID + " = ?";
+                " WHERE " + UserBot.USER_ID + " = ?";
         try {
             PreparedStatement ps = mConnection.prepareStatement(sql);
             ps.setString(1, user.wallet);
@@ -127,7 +128,7 @@ public class TUsers {
     public void updateAddress(UserBot user) {
         String sql = "UPDATE " + TABLE_USERS + " SET " +
                 UserBot.ADDRESS + " = ? " +
-                " WHERE "+ UserBot.USER_ID + " = ?";
+                " WHERE " + UserBot.USER_ID + " = ?";
         try {
             PreparedStatement ps = mConnection.prepareStatement(sql);
             ps.setString(1, user.address);
@@ -142,7 +143,7 @@ public class TUsers {
     public void updatePassword(UserBot user) {
         String sql = "UPDATE " + TABLE_USERS + " SET " +
                 UserBot.PASSWORD + " = ? " +
-                " WHERE "+ UserBot.USER_ID + " = ?";
+                " WHERE " + UserBot.USER_ID + " = ?";
         try {
             PreparedStatement ps = mConnection.prepareStatement(sql);
             ps.setString(1, user.password);
@@ -154,10 +155,45 @@ public class TUsers {
         }
     }
 
+    public void setMessage(UserBot user) {
+        String sql = "UPDATE " + TABLE_USERS + " SET " +
+                UserBot.MESSAGE_ID + " = ? " +
+                " WHERE " + UserBot.USER_ID + " = ?";
+        try {
+            PreparedStatement ps = mConnection.prepareStatement(sql);
+            ps.setLong(1, user.messageId);
+            ps.setLong(2, user.userId);
+            int numRowsUpdate = ps.executeUpdate();
+            System.out.println("updatePassword:" + numRowsUpdate);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+
+    public void updateVerify(UserBot user) {
+        String sql = "UPDATE " + TABLE_USERS + " SET " +
+                UserBot.ADDRESS + " = ? " +
+                UserBot.PASSWORD + " = ? " +
+                UserBot.VERIFY + " = ? " +
+                " WHERE " + UserBot.USER_ID + " = ?";
+        try {
+            PreparedStatement ps = mConnection.prepareStatement(sql);
+            ps.setString(1, user.address);
+            ps.setString(2, user.password);
+            ps.setLong(3, user.verify);
+            ps.setLong(4, user.userId);
+            int numRowsUpdate = ps.executeUpdate();
+            System.out.println("updateVerify:" + numRowsUpdate);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
 
     public void removeUser(Long userId) {
         String sql = "DELETE FROM " + TABLE_USERS +
-                " WHERE "+ UserBot.USER_ID + " = ?";
+                " WHERE " + UserBot.USER_ID + " = ?";
         try {
             PreparedStatement ps = mConnection.prepareStatement(sql);
             ps.setLong(1, userId);
@@ -167,7 +203,6 @@ public class TUsers {
             System.out.println(e.getMessage());
         }
     }
-
 
 
 }
