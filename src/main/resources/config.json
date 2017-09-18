@@ -1,0 +1,10 @@
+{
+  "host": "localhost",
+  "port_old": 8082,
+  "port": 3101,
+  "telegram_res": "http://bot1.unionchc.com",
+  "server": "https://node1.unionchc.com",
+  "sqlite": {
+    "path": "/home/bka/work/kuku/bots/unionchc/database/unionchc.db"
+  }
+}
