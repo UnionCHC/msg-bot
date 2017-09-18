@@ -4,19 +4,21 @@ package com.desprice.unionchc.service;
 import com.desprice.unionchc.Utils;
 import com.desprice.unionchc.entity.JspMessage;
 import com.desprice.unionchc.entity.JspPassord;
-import com.sun.nio.sctp.MessageInfo;
-import com.sun.xml.internal.ws.api.ResourceLoader;
+import com.desprice.unionchc.entity.UserBot;
+import com.desprice.unionchc.sqlite.TUsers;
+import com.desprice.unionchc.telegram.BotTelegram;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 @Path("telegram")
 public class TelegramRes {
@@ -39,9 +41,9 @@ public class TelegramRes {
 
 
     @GET
-    @Path("password/{user:\\d+}")
+    @Path("password/{user:\\d+}/{msg:\\d+}")
     @Produces(MediaType.TEXT_HTML)
-    public Response getPassword(@PathParam("user") String userName) {
+    public Response getPassword(@PathParam("user") String userName, @PathParam("msg") String msg) {
 
         //InputStream inputStream = getClass().getClassLoader().getResourceAsStream("/WEB-INF/jsp/password.html");
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("html/password.html");
@@ -71,17 +73,33 @@ public class TelegramRes {
     @Produces(MediaType.APPLICATION_JSON)
     public Response passwordUpdate(@NotNull JspPassord param) {
 
-        LOGGER.debug("passwordUpdate"+ Utils.jsonToString(param));
+        LOGGER.debug("passwordUpdate" + Utils.jsonToString(param));
 
         JspMessage messageInfo = new JspMessage();
 
-        messageInfo.setStatus(Response.Status.OK);
-        messageInfo.setMessage("Update");
+        if (!param.password1.equals(param.password2)) {
+            messageInfo.setStatus(Response.Status.PRECONDITION_FAILED);
+            messageInfo.setMessage("Пароли должны совпадать");
 
-        try {
+        } else {
+
+            messageInfo.setStatus(Response.Status.OK);
+            messageInfo.setMessage("Update");
+            try {
+                BotTelegram bot = new BotTelegram();
+
+                //param.path
 
 
-        } catch (Exception ex) {
+                UserBot userBot = TUsers.getInstance().getUser(param.path1);
+                userBot.password = param.password1;
+                userBot.messageId = param.path2;
+                bot.setUserBot(userBot);
+                bot.createUser();
+                messageInfo.setStatus(Response.Status.OK);
+                messageInfo.setMessage("");
+            } catch (Exception ex) {
+            }
         }
         return Response.status(Response.Status.OK).entity(messageInfo).build();
     }

@@ -1,6 +1,6 @@
 package com.desprice.unionchc.sqlite;
 
-import com.desprice.unionchc.entity.BotUser;
+import com.desprice.unionchc.entity.UserBot;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -33,7 +33,7 @@ public class TUsers {
 
     private void createTableUsers() {
         System.out.println("create table: " + TABLE_USERS);
-        String sql = " CREATE TABLE " + TABLE_USERS + "(" + BotUser.getFieldCreate() + " );";
+        String sql = " CREATE TABLE " + TABLE_USERS + "(" + UserBot.getFieldCreate() + " );";
         executeSql(sql);
         sql = "CREATE UNIQUE INDEX idx_" + TABLE_USERS + "_user ON " + TABLE_USERS + " (user_id);";
         executeSql(sql);
@@ -41,16 +41,15 @@ public class TUsers {
     }
 
 
-    public void checkUser(BotUser user) {
-        String sql = "SELECT * FROM " + TABLE_USERS + " WHERE " + BotUser.USER_ID + " = ?";
+    public void checkUser(UserBot user) {
+        String sql = "SELECT * FROM " + TABLE_USERS + " WHERE " + UserBot.USER_ID + " = ?";
         try {
             PreparedStatement ps = mConnection.prepareStatement(sql);
             ps.setLong(1, user.userId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                System.out.println(rs.getLong(BotUser.USER_ID) + "\t" +
-                        rs.getString(BotUser.FIRSTNAME) + "\t");
-
+                System.out.println(rs.getLong(UserBot.USER_ID) + "\t" +
+                        rs.getString(UserBot.FIRSTNAME) + "\t");
             } else {
                 addUser(user);
             }
@@ -61,13 +60,13 @@ public class TUsers {
 
     }
 
-    private void addUser(BotUser user) {
+    private void addUser(UserBot user) {
         String sql = "INSERT OR REPLACE INTO " + TABLE_USERS + "(" +
-                BotUser.CHAT_ID + " , " +
-                BotUser.USER_ID + " , " +
-                BotUser.FIRSTNAME + " , " +
-                BotUser.LASTNAME + " , " +
-                BotUser.USERNAME + "  " +
+                UserBot.CHAT_ID + " , " +
+                UserBot.USER_ID + " , " +
+                UserBot.FIRSTNAME + " , " +
+                UserBot.LASTNAME + " , " +
+                UserBot.USERNAME + "  " +
                 ") VALUES (?, ?, ?, ?, ?)";
         try {
             PreparedStatement ps = mConnection.prepareStatement(sql);
@@ -84,37 +83,36 @@ public class TUsers {
 
     }
 
-
-    public BotUser getUser(Long userId) {
-        BotUser botUser = new BotUser();
-        String sql = "SELECT * FROM " + TABLE_USERS + " WHERE " + BotUser.USER_ID + " = ?";
+    public UserBot getUser(Long userId) {
+        UserBot userBot = new UserBot();
+        String sql = "SELECT * FROM " + TABLE_USERS + " WHERE " + UserBot.USER_ID + " = ?";
         try {
             PreparedStatement ps = mConnection.prepareStatement(sql);
             ps.setLong(1, userId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                botUser.userId = rs.getLong(BotUser.USER_ID);
-                botUser.firstName = rs.getString(BotUser.FIRSTNAME);
-                botUser.lastName = rs.getString(BotUser.LASTNAME);
-                botUser.userName = rs.getString(BotUser.USERNAME);
-                botUser.wallet = rs.getString(BotUser.WALLET);
-                botUser.address = rs.getString(BotUser.ADDRESS);
-                botUser.password = rs.getString(BotUser.PASSWORD);
+                userBot.userId = rs.getLong(UserBot.USER_ID);
+                userBot.firstName = rs.getString(UserBot.FIRSTNAME);
+                userBot.lastName = rs.getString(UserBot.LASTNAME);
+                userBot.userName = rs.getString(UserBot.USERNAME);
+                userBot.wallet = rs.getString(UserBot.WALLET);
+                userBot.address = rs.getString(UserBot.ADDRESS);
+                userBot.password = rs.getString(UserBot.PASSWORD);
 
-                System.out.println(rs.getLong(BotUser.USER_ID) + "\t" +
-                   rs.getString(BotUser.FIRSTNAME) + "\t");
+                System.out.println(rs.getLong(UserBot.USER_ID) + "\t" +
+                   rs.getString(UserBot.FIRSTNAME) + "\t");
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        return botUser;
+        return userBot;
     }
 
 
-    public void updateWallet(BotUser user) {
+    public void updateWallet(UserBot user) {
         String sql = "UPDATE " + TABLE_USERS + " SET " +
-                BotUser.WALLET + " = ? " +
-                " WHERE "+ BotUser.USER_ID + " = ?";
+                UserBot.WALLET + " = ? " +
+                " WHERE "+ UserBot.USER_ID + " = ?";
         try {
             PreparedStatement ps = mConnection.prepareStatement(sql);
             ps.setString(1, user.wallet);
@@ -126,10 +124,10 @@ public class TUsers {
         }
     }
 
-    public void updateAddress(BotUser user) {
+    public void updateAddress(UserBot user) {
         String sql = "UPDATE " + TABLE_USERS + " SET " +
-                BotUser.ADDRESS + " = ? " +
-                " WHERE "+ BotUser.USER_ID + " = ?";
+                UserBot.ADDRESS + " = ? " +
+                " WHERE "+ UserBot.USER_ID + " = ?";
         try {
             PreparedStatement ps = mConnection.prepareStatement(sql);
             ps.setString(1, user.address);
@@ -141,10 +139,10 @@ public class TUsers {
         }
     }
 
-    public void updatePassword(BotUser user) {
+    public void updatePassword(UserBot user) {
         String sql = "UPDATE " + TABLE_USERS + " SET " +
-                BotUser.PASSWORD + " = ? " +
-                " WHERE "+ BotUser.USER_ID + " = ?";
+                UserBot.PASSWORD + " = ? " +
+                " WHERE "+ UserBot.USER_ID + " = ?";
         try {
             PreparedStatement ps = mConnection.prepareStatement(sql);
             ps.setString(1, user.password);
@@ -159,7 +157,7 @@ public class TUsers {
 
     public void removeUser(Long userId) {
         String sql = "DELETE FROM " + TABLE_USERS +
-                " WHERE "+ BotUser.USER_ID + " = ?";
+                " WHERE "+ UserBot.USER_ID + " = ?";
         try {
             PreparedStatement ps = mConnection.prepareStatement(sql);
             ps.setLong(1, userId);
@@ -169,6 +167,7 @@ public class TUsers {
             System.out.println(e.getMessage());
         }
     }
+
 
 
 }

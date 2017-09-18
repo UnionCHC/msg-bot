@@ -8,7 +8,7 @@ import org.telegram.telegrambots.api.objects.User;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class BotUser {
+public class UserBot {
 
     //    public static final String ID = "id";
     public static final String CHAT_ID = "chat_id";
@@ -35,12 +35,13 @@ public class BotUser {
     public String wallet;
     public String address;
     public String password;
+    public Long messageId;
 
-    public BotUser() {
+    public UserBot() {
         this.userId = 0L;
     }
 
-    public BotUser(Long id, String firstName, String lastName, String userName) {
+    public UserBot(Long id, String firstName, String lastName, String userName) {
         this.chatId = id;
         this.userId = id;
         this.firstName = firstName;
@@ -48,7 +49,7 @@ public class BotUser {
         this.userName = userName;
     }
 
-    public BotUser(User user) {
+    public UserBot(User user) {
         this.chatId = user.getId().longValue();
         this.userId = user.getId().longValue();
         this.firstName = user.getFirstName();

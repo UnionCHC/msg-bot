@@ -5,7 +5,7 @@ import com.desprice.unionchc.Constants;
 import com.desprice.unionchc.EthereumSer;
 import com.desprice.unionchc.Options;
 import com.desprice.unionchc.Utils;
-import com.desprice.unionchc.entity.BotUser;
+import com.desprice.unionchc.entity.UserBot;
 import com.desprice.unionchc.entity.Config;
 import com.desprice.unionchc.entity.UserStep;
 import com.desprice.unionchc.sqlite.TStep;
@@ -55,7 +55,7 @@ public class BotTelegram extends TelegramLongPollingBot {
     public static final String CALL_INC2 = "Доб 2";
     public static final String CALL_GET2 = "Пол 2";
 
-    private BotUser userBot = null;
+    private UserBot userBot = null;
     private UserStep userStep = null;
 
 
@@ -66,6 +66,14 @@ public class BotTelegram extends TelegramLongPollingBot {
         if (result.charAt(result.length() - 1) != File.separatorChar)
             result += File.separator;
         return result;
+    }
+
+    public void setUserBot(UserBot userBot) {
+        this.userBot = userBot;
+    }
+
+    public void setUserBot(long userId) {
+        userBot = TUsers.getInstance().getUser(userId);
     }
 
     public static void init() {
@@ -95,10 +103,11 @@ public class BotTelegram extends TelegramLongPollingBot {
 
 
         if (update.hasMessage()) {
-
             Message message = update.getMessage();
 
-            userBot = TUsers.getInstance().getUser(message.getChat().getId());
+            userBot = new UserBot(message.getChat().getId(), message.getChat().getFirstName(), message.getChat().getLastName(), message.getChat().getUserName());
+            TUsers.getInstance().checkUser(userBot);
+            // userBot = TUsers.getInstance().getUser(message.getChat().getId());
             userStep = TStep.getInstance().getStep(userBot.userId, Constants.BOT_TELEGRAM);
             switch (userStep.step) {
                 case STEP_EXISTS_START:
@@ -179,12 +188,37 @@ public class BotTelegram extends TelegramLongPollingBot {
         }
     }
 
+    private void sendMsgCreate() {
+        try {
+
+            EditMessageText editMessage = new EditMessageText();
+            editMessage.setChatId(userBot.userId.toString());
+            editMessage.setMessageId(userBot.messageId.intValue());
+            if (null != userBot.address && !userBot.address.isEmpty())
+                editMessage.setText("Ваш адрес\n" + userBot.address);
+            else
+                editMessageText(editMessage);
+            editMessageText(editMessage);
+
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.enableMarkdown(true);
+            sendMessage.setChatId(userBot.userId.toString());
+            sendMessage.setReplyMarkup(getMenuKeyboard());
+            sendMessage.setText("Вам доступны команды");
+            sendMessage(sendMessage);
+
+
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private void getStart(Update update) {
         Message messageIn = update.getMessage();
         SendMessage sendMessage = initMessage(messageIn, true);
         try {
-            if (userBot.userId != 0) {
+            if (null != userBot.password && !userBot.password.isEmpty()) {
                 sendMessage.setText("Вы зарегистрированы");
                 sendMessage.setReplyMarkup(getMenuKeyboard());
                 sendMessage(sendMessage);
@@ -192,7 +226,8 @@ public class BotTelegram extends TelegramLongPollingBot {
             }
 
             String path = getPathWebUrl();
-            path += messageIn.getChat().getId();
+            path += "telegram/password/" + messageIn.getChat().getId() +
+                    "/" + messageIn.getMessageId();
             System.out.println(path);
 
             String text = "Регистрация в системе \n Ваш выбор" +
@@ -223,7 +258,8 @@ public class BotTelegram extends TelegramLongPollingBot {
             markup.setKeyboard(keyboard);
             sendMessage.setReplyMarkup(markup);
 
-            sendMessage(sendMessage);
+            Message sendOk = sendMessage(sendMessage);
+            System.out.println(sendOk.getMessageId());
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
@@ -247,7 +283,7 @@ public class BotTelegram extends TelegramLongPollingBot {
                     sendMessageEdit.setMessageId(message.getMessageId());
                     sendMessageEdit.setText("Отправьте Ваш адрес");
                     editMessageText(sendMessageEdit);
-                    userBot = new BotUser(message.getChat().getId(), message.getChat().getFirstName(), message.getChat().getLastName(), message.getChat().getUserName());
+                    userBot = new UserBot(message.getChat().getId(), message.getChat().getFirstName(), message.getChat().getLastName(), message.getChat().getUserName());
                     tUsers.checkUser(userBot);
                     userStep.userId = userBot.userId;
                     userStep.step = STEP_EXISTS_ADDRESS;
@@ -271,14 +307,7 @@ public class BotTelegram extends TelegramLongPollingBot {
                             return;
                         }
                     }
-                    if (null == userBot.address || userBot.address.isEmpty()) {
-                        tUsers.updatePassword(userBot);
-                        userBot.address = EthereumSer.getInstance().createAccount(userBot.password);
-                        if (null != userBot.address && !userBot.address.isEmpty()) {
-                            tUsers.updateAddress(userBot);
-                            EthereumSer.getInstance().sendMoney(Constants.BOT_ACCOUNT[1], userBot.address, Constants.INIT_MONEY, Constants.BOT_ACCOUNT[0]);
-                        }
-                    }
+                    createUser();
                     userStep.step = Constants.STEP_NONE;
                     TStep.getInstance().updateStep(userStep);
                     SendMessage sendMessage = initMessage(update.getMessage(), true);
@@ -291,11 +320,28 @@ public class BotTelegram extends TelegramLongPollingBot {
         }
     }
 
+    public void createUser() {
+        TUsers tUsers = TUsers.getInstance();
+/*
+        if (null == userBot.address || userBot.address.isEmpty()) {
+            tUsers.updatePassword(userBot);
+            if (null == userBot.address || userBot.address.isEmpty()) {
+                userBot.address = EthereumSer.getInstance().createAccount(userBot.password);
+                tUsers.updateAddress(userBot);
+                EthereumSer.getInstance().sendMoney(Constants.BOT_ACCOUNT[1], userBot.address, Constants.INIT_MONEY, Constants.BOT_ACCOUNT[0]);
+                sendMsgCreate();
+            }
+        }
+*/
+        sendMsgCreate();
+    }
+
+
     private void startNew(Update update) {
         CallbackQuery query = update.getCallbackQuery();
         Message message = query.getMessage();
         try {
-            BotUser user = new BotUser(message.getChat().getId(), message.getChat().getFirstName(), message.getChat().getLastName(), message.getChat().getUserName());
+            UserBot user = new UserBot(message.getChat().getId(), message.getChat().getFirstName(), message.getChat().getLastName(), message.getChat().getUserName());
             userStep.userId = user.userId;
             TUsers tUsers = TUsers.getInstance();
             tUsers.checkUser(user);

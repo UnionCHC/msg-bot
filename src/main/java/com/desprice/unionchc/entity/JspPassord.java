@@ -5,6 +5,7 @@ public class JspPassord {
   //  public Long chatId;
     public String password1;
     public String password2;
-    public String path;
+    public Long path1;
+    public Long path2;
 
 }
