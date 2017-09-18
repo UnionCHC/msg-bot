@@ -1,9 +1,9 @@
 {
   "host": "localhost",
-  "port": 8082,
-
+  "port_old": 8082,
+  "port": 3101,
+  "telegram_res": "http://bot1.unionchc.com",
   "server": "https://node1.unionchc.com",
-
   "sqlite": {
     "path": "/home/unionchc/database/unionchc.db"
   }

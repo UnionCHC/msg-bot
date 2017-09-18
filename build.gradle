@@ -10,41 +10,39 @@ repositories {
     mavenCentral()
 }
 
-ext.grizzlyVersion = '2.4.2'
+project.ext {
+    grizzlyVersion = '2.4.2'
+    jerseyVersion = '2.26'
+}
 
-//ext.jerseyVersion = '2.25.1'
-ext.jerseyVersion = '2.26'
 
 dependencies {
 
     // https://mvnrepository.com/artifact/org.glassfish.grizzly/grizzly-http-servlet
-    compile group: 'org.glassfish.grizzly', name: 'grizzly-http-servlet', version: $grizzlyVersion
+    compile group: 'org.glassfish.grizzly', name: 'grizzly-http-servlet', version: project.grizzlyVersion
 
-    /*
-    compile group: 'org.glassfish.grizzly', name: 'grizzly-framework', version: $grizzlyVersion
-    compile group: 'org.glassfish.grizzly', name: 'grizzly-http', version: $grizzlyVersion
-    compile group: 'org.glassfish.grizzly', name: 'grizzly-http-server', version: $grizzlyVersion
-    */
+    compile group: 'org.glassfish.jersey.core', name: 'jersey-server', version: project.jerseyVersion
+    compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-grizzly2-http', version: project.jerseyVersion
+    compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: ' 2.26 '
+    // https://mvnrepository.com/artifact/org.glassfish.jersey.media/jersey-media-multipart
+    compile group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart', version: project.jerseyVersion
 
-    compile group: 'org.glassfish.jersey.core', name: 'jersey-server', version: $jerseyVersion
-    compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-grizzly2-http', version: $jerseyVersion
-    compile group: 'org.glassfish.jersey.media:jersey-media-json-jackson', version: $jerseyVersion
-    compile group: 'org.glassfish.jersey.media:jersey-media-multipart', version: $jerseyVersion
+
     compile 'commons-daemon:commons-daemon:1.0.15'
 
     // https://mvnrepository.com/artifact/org.glassfish.jersey.inject/jersey-hk2
-    //compile group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: $jerseyVersion
+    compile group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: project.jerseyVersion
 
     // https://mvnrepository.com/artifact/org.glassfish.jersey.ext/jersey-mvc-jsp
-    compile group: 'org.glassfish.jersey.ext', name: 'jersey-mvc', version: $jerseyVersion
-    compile group: 'org.glassfish.jersey.ext', name: 'jersey-mvc-jsp', version: $jerseyVersion
+    compile group: 'org.glassfish.jersey.ext', name: 'jersey-mvc', version: project.jerseyVersion
+    compile group: 'org.glassfish.jersey.ext', name: 'jersey-mvc-jsp', version: project.jerseyVersion
 
 
     compile group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
 
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.24'
-    // compile "org.slf4j:slf4j-simple:1.7.25"
+
 
     compile "org.telegram:telegrambots:3.3"
 
@@ -61,6 +59,13 @@ dependencies {
 /*
 
     compile 'javax.ws.rs:javax.ws.rs-api:2.1'
+
+   // https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api
+   // provided group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.0'
+
+    compile group: 'org.glassfish.grizzly', name: 'grizzly-framework', version:  project.grizzlyVersion
+    compile group: 'org.glassfish.grizzly', name: 'grizzly-http', version:  project.grizzlyVersion
+    compile group: 'org.glassfish.grizzly', name: 'grizzly-http-server', version:  project.grizzlyVersion
 
     // https://mvnrepository.com/artifact/org.glassfish.jersey.inject/jersey-hk2
     compile group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: '2.26'

@@ -61,33 +61,23 @@ public class TelegramRes {
 
         //finally convert StringBuffer object to String!
         String html = sb.toString();
-
-/*
-
-        String html = "" +
-                "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js\"></script>\n" +
-
-                "Пароль: <input type=\"password\" id=\"password1\" value=\"\"></br>\n" +
-                "Повтор: <input type=\"password1\" id=\"password1\" value=\"\"></br>\n" +
-
-                "<button onclick=sendPassword()>Отправить</button>" +
-                "";
-*/
         Response response = Response.ok(html).build();
         return response;
     }
 
-
-
     @POST
-    @Path("/password/update")
+    @Path("/password/update/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response partyListUpdate(@NotNull JspPassord param, @Context HttpServletRequest httpRequest) {
+    public Response passwordUpdate(@NotNull JspPassord param) {
 
-        LOGGER.debug(httpRequest.getContextPath());
+        LOGGER.debug("passwordUpdate"+ Utils.jsonToString(param));
 
         JspMessage messageInfo = new JspMessage();
+
+        messageInfo.setStatus(Response.Status.OK);
+        messageInfo.setMessage("Update");
+
         try {
 
 
@@ -96,9 +86,23 @@ public class TelegramRes {
         return Response.status(Response.Status.OK).entity(messageInfo).build();
     }
 
+    @POST
+    @Path("/password/update1")
+    // @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response passwordUpdate1(@FormParam("password1") String username, @FormParam("password2") String password, @FormParam("path") String path) {
+
+        LOGGER.debug("");
+
+      /*  JspMessage messageInfo = new JspMessage();
+        try {
 
 
-
+        } catch (Exception ex) {
+        }*/
+        //return Response.status(Response.Status.OK).entity(messageInfo).build();
+        return Response.status(Response.Status.OK).build();
+    }
 
 
     // not work

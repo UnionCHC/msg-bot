@@ -3,8 +3,10 @@ package com.desprice.unionchc.telegram;
 
 import com.desprice.unionchc.Constants;
 import com.desprice.unionchc.EthereumSer;
+import com.desprice.unionchc.Options;
 import com.desprice.unionchc.Utils;
 import com.desprice.unionchc.entity.BotUser;
+import com.desprice.unionchc.entity.Config;
 import com.desprice.unionchc.entity.UserStep;
 import com.desprice.unionchc.sqlite.TStep;
 import com.desprice.unionchc.sqlite.TUsers;
@@ -27,6 +29,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 import org.web3j.utils.Convert;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -41,6 +44,8 @@ public class BotTelegram extends TelegramLongPollingBot {
 
     public static final String DATA_START_NEW = "data_start_new";
     public static final String DATA_START_EXISTS = "data_start_exists";
+    public static final String CALL_ENTER = "Войти";
+    public static final String CALL_EXIT = "Выйти";
     public static final String CALL_BALANCE = "Баланс";
     public static final String CALL_INFO = "Информация";
     public static final String CALL_CONTRACT = "Контракт";
@@ -50,8 +55,18 @@ public class BotTelegram extends TelegramLongPollingBot {
     public static final String CALL_INC2 = "Доб 2";
     public static final String CALL_GET2 = "Пол 2";
 
-    private BotUser botUser = null;
+    private BotUser userBot = null;
     private UserStep userStep = null;
+
+
+    private String getPathWebUrl() {
+        String result;
+        Config config = Options.getInstance().getConfig();
+        result = config.telegramRes;
+        if (result.charAt(result.length() - 1) != File.separatorChar)
+            result += File.separator;
+        return result;
+    }
 
     public static void init() {
         ApiContextInitializer.init();
@@ -83,8 +98,8 @@ public class BotTelegram extends TelegramLongPollingBot {
 
             Message message = update.getMessage();
 
-            botUser = TUsers.getInstance().getUser(message.getChat().getId());
-            userStep = TStep.getInstance().getStep(botUser.userId, Constants.BOT_TELEGRAM);
+            userBot = TUsers.getInstance().getUser(message.getChat().getId());
+            userStep = TStep.getInstance().getStep(userBot.userId, Constants.BOT_TELEGRAM);
             switch (userStep.step) {
                 case STEP_EXISTS_START:
                 case STEP_EXISTS_ADDRESS:
@@ -96,22 +111,26 @@ public class BotTelegram extends TelegramLongPollingBot {
                     return;
             }
 
+            String menuText = message.getText();
+
             if (message != null && message.hasText()) {
-                if (message.getText().equals("/start"))
+                if (menuText.equals("/start") || menuText.equals(CALL_ENTER))
                     getStart(update);
-                else if (message.getText().equals(CALL_BALANCE))
+                else if (menuText.equals(CALL_EXIT))
+                    callExit(update);
+                else if (menuText.equals(CALL_BALANCE))
                     getBalance(update);
-                else if (message.getText().equals(CALL_INFO))
+                else if (menuText.equals(CALL_INFO))
                     getInfo(update);
-                else if (message.getText().equals(CALL_CONTRACT))
+                else if (menuText.equals(CALL_CONTRACT))
                     callContract(update, "sendEvent");
-                else if (message.getText().equals(CALL_INC1))
+                else if (menuText.equals(CALL_INC1))
                     callContract(update, "incValue1");
-                else if (message.getText().equals(CALL_INC2))
+                else if (menuText.equals(CALL_INC2))
                     callContract(update, "incValue2");
-                else if (message.getText().equals("/help"))
+                else if (menuText.equals("/help"))
                     sendMsg(message, "Привет", true);
-                else if (message.getText().equals("*"))
+                else if (menuText.equals("*"))
                     hideButton(message);
                 else
                     sendMsg(message, "Я не знаю что ответить на это\n" +
@@ -126,8 +145,8 @@ public class BotTelegram extends TelegramLongPollingBot {
             answer.setCallbackQueryId(query.getId());
 
             Message message = query.getMessage();
-            botUser = TUsers.getInstance().getUser(message.getChat().getId());
-            userStep = TStep.getInstance().getStep(botUser.userId, Constants.BOT_TELEGRAM);
+            userBot = TUsers.getInstance().getUser(message.getChat().getId());
+            userStep = TStep.getInstance().getStep(userBot.userId, Constants.BOT_TELEGRAM);
 
             if (query.getData().equals(DATA_START_NEW)) {
                 startNew(update);
@@ -137,6 +156,7 @@ public class BotTelegram extends TelegramLongPollingBot {
             }
         }
     }
+
 
     private SendMessage initMessage(Message message, boolean isReplay) {
         SendMessage sendMessage = new SendMessage();
@@ -164,15 +184,23 @@ public class BotTelegram extends TelegramLongPollingBot {
         Message messageIn = update.getMessage();
         SendMessage sendMessage = initMessage(messageIn, true);
         try {
-            if (botUser.userId != 0) {
+            if (userBot.userId != 0) {
                 sendMessage.setText("Вы зарегистрированы");
                 sendMessage.setReplyMarkup(getMenuKeyboard());
                 sendMessage(sendMessage);
                 return;
             }
 
-            String text = "Регистрация в системе \n Ваш выбор";
+            String path = getPathWebUrl();
+            path += messageIn.getChat().getId();
+            System.out.println(path);
+
+            String text = "Регистрация в системе \n Ваш выбор" +
+                    "\n\n  <a href=\" " + path + "\"> Новый</a>" +
+                    "" + path;
             sendMessage.setText(text);
+            sendMessage.setParseMode("html");
+
 
             InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
             List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
@@ -180,6 +208,11 @@ public class BotTelegram extends TelegramLongPollingBot {
             InlineKeyboardButton button = new InlineKeyboardButton();
             button.setText("Новый");
             button.setCallbackData(DATA_START_NEW);
+
+            // button.setUrl("https://unionchc.com");
+            button.setUrl(path);
+
+
             row.add(button);
             button = new InlineKeyboardButton();
             button.setText("Существующий");
@@ -214,36 +247,36 @@ public class BotTelegram extends TelegramLongPollingBot {
                     sendMessageEdit.setMessageId(message.getMessageId());
                     sendMessageEdit.setText("Отправьте Ваш адрес");
                     editMessageText(sendMessageEdit);
-                    botUser = new BotUser(message.getChat().getId(), message.getChat().getFirstName(), message.getChat().getLastName(), message.getChat().getUserName());
-                    tUsers.checkUser(botUser);
-                    userStep.userId = botUser.userId;
+                    userBot = new BotUser(message.getChat().getId(), message.getChat().getFirstName(), message.getChat().getLastName(), message.getChat().getUserName());
+                    tUsers.checkUser(userBot);
+                    userStep.userId = userBot.userId;
                     userStep.step = STEP_EXISTS_ADDRESS;
                     TStep.getInstance().updateStep(userStep);
                     break;
                 case STEP_EXISTS_ADDRESS:
 
-                    botUser.address = update.getMessage().getText();
-                    tUsers.updateAddress(botUser);
+                    userBot.address = update.getMessage().getText();
+                    tUsers.updateAddress(userBot);
                     userStep.step = Constants.STEP_PASSWORD;
                     TStep.getInstance().updateStep(userStep);
                     sendMsg(update.getMessage(), "Отправьте Ваш пароль", true);
                     break;
                 case Constants.STEP_PASSWORD:
-                    botUser.password = update.getMessage().getText();
-                    if (null != botUser.address && !botUser.address.isEmpty()) {
-                        if (EthereumSer.getInstance().checkUnlock(botUser.address, botUser.password))
-                            tUsers.updatePassword(botUser);
+                    userBot.password = update.getMessage().getText();
+                    if (null != userBot.address && !userBot.address.isEmpty()) {
+                        if (EthereumSer.getInstance().checkUnlock(userBot.address, userBot.password))
+                            tUsers.updatePassword(userBot);
                         else {
                             sendMsg(update.getMessage(), "Неверный пароль\n, Отправьте другой пароль", true);
                             return;
                         }
                     }
-                    if (null == botUser.address || botUser.address.isEmpty()) {
-                        tUsers.updatePassword(botUser);
-                        botUser.address = EthereumSer.getInstance().createAccount(botUser.password);
-                        if (null != botUser.address && !botUser.address.isEmpty()) {
-                            tUsers.updateAddress(botUser);
-                            EthereumSer.getInstance().sendMoney(Constants.BOT_ACCOUNT[1], botUser.address, Constants.INIT_MONEY, Constants.BOT_ACCOUNT[0]);
+                    if (null == userBot.address || userBot.address.isEmpty()) {
+                        tUsers.updatePassword(userBot);
+                        userBot.address = EthereumSer.getInstance().createAccount(userBot.password);
+                        if (null != userBot.address && !userBot.address.isEmpty()) {
+                            tUsers.updateAddress(userBot);
+                            EthereumSer.getInstance().sendMoney(Constants.BOT_ACCOUNT[1], userBot.address, Constants.INIT_MONEY, Constants.BOT_ACCOUNT[0]);
                         }
                     }
                     userStep.step = Constants.STEP_NONE;
@@ -285,8 +318,22 @@ public class BotTelegram extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
+    }
 
-
+    private void callExit(Update update) {
+        if (userBot.userId > 0) {
+            try {
+                TUsers tUsers = TUsers.getInstance();
+                tUsers.removeUser(userBot.userId);
+                Message message = update.getMessage();
+                SendMessage sendMessage = initMessage(message, false);
+                sendMessage.setText("Вы вышли из системы");
+                sendMessage.setReplyMarkup(getMenuStart());
+                sendMessage(sendMessage);
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 
@@ -295,7 +342,7 @@ public class BotTelegram extends TelegramLongPollingBot {
             Message message = update.getMessage();
             SendMessage sendMessage = initMessage(message, false);
             sendMessage.setText("Ваша информация\n" +
-                    "Адрес: " + botUser.address);
+                    "Адрес: " + userBot.address);
             sendMessage.setReplyMarkup(getMenuKeyboard());
             sendMessage(sendMessage);
         } catch (TelegramApiException e) {
@@ -308,7 +355,7 @@ public class BotTelegram extends TelegramLongPollingBot {
             Message message = update.getMessage();
             SendMessage sendMessage = initMessage(message, false);
 
-            BigInteger balance = EthereumSer.getInstance().getBalance(botUser.address);
+            BigInteger balance = EthereumSer.getInstance().getBalance(userBot.address);
             if (null != balance)
                 sendMessage.setText("Ваш баланс: " + Convert.fromWei(new BigDecimal(balance), Convert.Unit.ETHER));
             else
@@ -321,8 +368,8 @@ public class BotTelegram extends TelegramLongPollingBot {
 
 
     private void callContract(Update update, String functionName) {
-        String result = EthereumSer.getInstance().sendContract(botUser.address, Constants.BOT_CONTRACT, functionName, botUser.password);
-       // sendMsg(update.getMessage(), result, true);
+        String result = EthereumSer.getInstance().sendContract(userBot.address, Constants.BOT_CONTRACT, functionName, userBot.password);
+        // sendMsg(update.getMessage(), result, true);
         sendMsg(update.getMessage(), "Контракт отправлен", true);
     }
 
@@ -336,6 +383,22 @@ public class BotTelegram extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
+    }
+
+
+    private static ReplyKeyboardMarkup getMenuStart() {
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(false);
+
+        List<KeyboardRow> keyboard = new ArrayList<>();
+        KeyboardRow keyboardFirstRow = new KeyboardRow();
+        keyboardFirstRow.add(CALL_ENTER);
+        keyboard.add(keyboardFirstRow);
+
+        replyKeyboardMarkup.setKeyboard(keyboard);
+        return replyKeyboardMarkup;
     }
 
 

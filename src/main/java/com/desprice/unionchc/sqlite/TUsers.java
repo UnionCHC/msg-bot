@@ -157,4 +157,18 @@ public class TUsers {
     }
 
 
+    public void removeUser(Long userId) {
+        String sql = "DELETE FROM " + TABLE_USERS +
+                " WHERE "+ BotUser.USER_ID + " = ?";
+        try {
+            PreparedStatement ps = mConnection.prepareStatement(sql);
+            ps.setLong(1, userId);
+            int numRowsUpdate = ps.executeUpdate();
+            System.out.println("removeUser:" + numRowsUpdate);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+
 }
