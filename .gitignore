@@ -7,6 +7,9 @@ libs
 logs
 gradlew*
 out
+service.pid
+service.sh
+src/main/resources/config.json
 src/main/resources/config.json
 src/main/resources/logback.xml
 
