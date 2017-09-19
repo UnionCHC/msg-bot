@@ -173,8 +173,8 @@ public class TUsers {
 
     public void updateVerify(UserBot user) {
         String sql = "UPDATE " + TABLE_USERS + " SET " +
-                UserBot.ADDRESS + " = ? " +
-                UserBot.PASSWORD + " = ? " +
+                UserBot.ADDRESS + " = ? ," +
+                UserBot.PASSWORD + " = ? , " +
                 UserBot.VERIFY + " = ? " +
                 " WHERE " + UserBot.USER_ID + " = ?";
         try {

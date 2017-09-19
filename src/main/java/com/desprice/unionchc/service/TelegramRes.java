@@ -71,6 +71,7 @@ public class TelegramRes {
         try {
             while ((line = bReader.readLine()) != null) {
                 sb.append(line);
+                sb.append("\n");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -101,12 +102,17 @@ public class TelegramRes {
                 BotTelegram bot = new BotTelegram();
 
                 UserBot userBot = TUsers.getInstance().getUser(param.path1);
-                userBot.password = param.password1;
-                userBot.messageId = param.path2;
-                bot.setUserBot(userBot);
-                bot.createUser();
-                messageInfo.setStatus(Response.Status.OK);
-                messageInfo.setMessage("");
+                if (userBot.verify == 1) {
+                    messageInfo.setStatus(Response.Status.PRECONDITION_FAILED);
+                    messageInfo.setMessage("Вы уже зарегистрированы");
+                } else {
+                    userBot.password = param.password1;
+                    //userBot.messageId = param.path2;
+                    bot.setUserBot(userBot);
+                    bot.createUser();
+                    messageInfo.setStatus(Response.Status.OK);
+                    messageInfo.setMessage("Вам создан адрес");
+                }
             } catch (Exception ex) {
             }
         }
@@ -118,38 +124,32 @@ public class TelegramRes {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response addressUpdate(@NotNull JspAddress param) {
-
-        LOGGER.debug("passwordUpdate" + Utils.jsonToString(param));
-
+        LOGGER.debug("addressUpdate" + Utils.jsonToString(param));
         JspMessage messageInfo = new JspMessage();
 
-        if (!param.password1.equals(param.password2)) {
+        if (param.password.isEmpty() || param.address.isEmpty()) {
             messageInfo.setStatus(Response.Status.PRECONDITION_FAILED);
-            messageInfo.setMessage("Пароли должны совпадать");
+            messageInfo.setMessage("Укажите адрес и пароль");
         } else {
             messageInfo.setStatus(Response.Status.OK);
-            messageInfo.setMessage("Update");
             try {
                 BotTelegram bot = new BotTelegram();
-
-                UserBot userBot = TUsers.getInstance().getUser(param.path1);
+                UserBot userBot = TUsers.getInstance().getUser(param.path);
                 userBot.address = param.address;
-                userBot.password = param.password1;
-                //userBot.messageId = param.path2;
+                userBot.password = param.password;
                 bot.setUserBot(userBot);
                 if (!bot.checkAddress()) {
                     messageInfo.setStatus(Response.Status.PRECONDITION_FAILED);
                     messageInfo.setMessage("Неверный пароль или адрес");
                 } else {
                     messageInfo.setStatus(Response.Status.OK);
-                    messageInfo.setMessage("");
+                    messageInfo.setMessage("Вы вошли в систему");
                 }
             } catch (Exception ex) {
             }
         }
         return Response.status(Response.Status.OK).entity(messageInfo).build();
     }
-
 
     // not work
     @GET

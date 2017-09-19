@@ -1,27 +1,43 @@
 package com.desprice.unionchc;
 
 import com.desprice.unionchc.exceptions.ExceptionConfig;
+import org.slf4j.LoggerFactory;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.request.RawTransaction;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.protocol.parity.Parity;
 import org.web3j.protocol.parity.methods.response.NewAccountIdentifier;
 import org.web3j.protocol.parity.methods.response.PersonalUnlockAccount;
+import org.web3j.tx.ClientTransactionManager;
+import org.web3j.tx.TransactionManager;
 import org.web3j.utils.Convert;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.logging.Logger;
+
+import rx.Subscription;
+
+import static org.web3j.protocol.core.methods.request.Transaction.createContractTransaction;
 
 public class EthereumSer {
 
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(EthereumSer.class);
 
     private static final BigInteger GAS_PRICE = BigInteger.valueOf(9_000L);
     private static final BigInteger GAS_LIMIT = BigInteger.valueOf(1_500_000L);
@@ -35,6 +51,9 @@ public class EthereumSer {
     public static EthereumSer getInstance() {
         return ourInstance;
     }
+
+    Subscription subscription;
+
 
     private EthereumSer() {
         init();
@@ -82,6 +101,10 @@ public class EthereumSer {
 
 
     public BigInteger getBalance(String address) {
+        if (null == address || address.isEmpty()) {
+            LOGGER.debug("getBalance address empty");
+            return null;
+        }
         try {
             BigInteger balance = mWeb3.ethGetBalance(address, DefaultBlockParameterName.LATEST).send().getBalance();
             System.out.println("balance: " + Convert.fromWei(new BigDecimal(balance), Convert.Unit.ETHER));
@@ -111,6 +134,7 @@ public class EthereumSer {
 
 
     public String sendContract(String address, String contractAdr, String functionName, String password) {
+        LOGGER.debug("sendContract " + functionName + " : " + address + " " + contractAdr);
         try {
             BigInteger nonce = mWeb3.ethGetTransactionCount(
                     address, DefaultBlockParameterName.LATEST).send().getTransactionCount();
@@ -121,21 +145,96 @@ public class EthereumSer {
             Transaction transaction = Transaction.createFunctionCallTransaction(address, nonce,
                     GAS_PRICE, GAS_LIMIT, contractAdr, encodedFunction);
 
-            /*
+/*
             EthSendTransaction result = mParity.personalSignAndSendTransaction(transaction, password).send();
             System.out.println("transaction hash: " + result.getTransactionHash());
             if (result.hasError()) {
                 return "transaction hash: " + result.getError().getMessage();
             } else
                 return "transaction hash: " + result.getTransactionHash();
-            */
-            CompletableFuture<EthSendTransaction> result = mParity.personalSignAndSendTransaction(transaction, password).sendAsync();
+*/
+
+            if (subscription == null || subscription.isUnsubscribed())
+                subscription = subscribeTransactions(address, contractAdr);
+
+            EthSendTransaction result = mParity.personalSignAndSendTransaction(transaction, password).sendAsync().get();
             System.out.println("transaction hash: " + result.toString());
+            if (result.hasError()) {
+                System.out.println("error: " + result.getError().getMessage());
+                return "error: " + result.getError().getMessage();
+            } else {
+                System.out.println("transaction hash: " + result.getTransactionHash());
+                return "transaction hash: " + result.getTransactionHash();
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
         }
         return "";
+    }
+
+
+    public BigInteger getValueEvent(String address, String contractAdr, int value) {
+        LOGGER.debug("getValueEvent " + " : " + address + " " + contractAdr);
+        try {
+            BigInteger nonce = mWeb3.ethGetTransactionCount(
+                    address, DefaultBlockParameterName.LATEST).send().getTransactionCount();
+            System.out.println("nonce: " + nonce);
+
+            ClientTransactionManager transactionManager = new ClientTransactionManager(mWeb3, address);
+
+            MyEvents events = MyEvents.load(contractAdr, mWeb3, transactionManager, GAS_PRICE, GAS_LIMIT);
+            Future<Uint256> uint256;
+            if (value == 1) {
+                uint256 = events.value1();
+            } else {
+                uint256 = events.value2();
+            }
+            System.out.println(uint256.get().getValue());
+            return uint256.get().getValue();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private Subscription subscribeTransactions(String address, String contractAdr) {
+        return mWeb3.transactionObservable().subscribe(tx -> {
+            System.out.println("+++ catch new transaction: " + tx.getHash());
+            try {
+                TransactionReceipt receipt = mWeb3.ethGetTransactionReceipt(tx.getHash()).send().getResult();
+                ClientTransactionManager transactionManager = new ClientTransactionManager(mWeb3, address);
+
+                MyEvents events = MyEvents.load(contractAdr, mWeb3, transactionManager, GAS_PRICE, GAS_LIMIT);
+                List<MyEvents.MyEventEventResponse> items = events.getMyEventEvents(receipt);
+                for (MyEvents.MyEventEventResponse event : items) {
+                    System.out.println("from: " + event._from);
+                    System.out.println("value: " + event._value.getValue());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private Subscription subscribeEvents(String address, String contractAdr) {
+        ClientTransactionManager transactionManager = new ClientTransactionManager(mWeb3, address);
+        MyEvents events = MyEvents.load(contractAdr, mWeb3, transactionManager, GAS_PRICE, GAS_LIMIT);
+        return events.myEventEventObservable(
+                DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
+                .subscribe(myEventEventResponse -> {
+                    System.out.println("+++ event +++");
+                    System.out.print("from: " + myEventEventResponse._from);
+                    System.out.print("value: " + myEventEventResponse._value);
+                });
     }
 
 

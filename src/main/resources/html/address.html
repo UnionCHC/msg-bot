@@ -9,25 +9,26 @@
 
 <script>
     function sendPassword() {
-        $('#butSend').prop("disabled", true);
+       // $('#butSend').prop("disabled", true);
         $.ajax({
             type: 'POST',
             contentType: 'application/json; charset=UTF-8',
             url: '/telegram/address/update',
             data: JSON.stringify({
-                "password": $("#password1").val(),
-                "address": $("#password2").val(),
-                "path1": window.location.href.split('/')[5].trim(),
-                "path2": window.location.href.split('/')[6].trim()
+                "password": $("#password").val(),
+                "address": $("#address").val(),
+                "path": window.location.href.split('/')[5].trim(),
             }),
             success: function (dataReturn) {
                 if (null != dataReturn && dataReturn.status == 200) {
-                    alert('Вам создан адрес' + dataReturn.message);
+                    //alert('Вам создан адрес' + dataReturn.message);
+                    $('#info').css('background-color', '');
                 } else {
-                    alert('Ошибка:' + dataReturn.message);
+                    $('#info').css('background-color', 'red');
+                    //alert('Ошибка:' + dataReturn.message);
                 }
+                $("#info").text(dataReturn.message);
                 console.log('updated successfully');
-
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 console.log('update error: ' + textStatus);
@@ -38,16 +39,16 @@
 </script>
 
 <body>
-<H5>Укажите Ваш адрес и пароль</H5>
+<H3>Укажите Ваш адрес и пароль</H3>
 <input hidden type="text" name="path" id="path"/>
 <input hidden type="text" id="msg" value="REPLACE_MSG_ID"/>
-Адрес: <input type="text" id="address" value=""></br>
-Пароль: <input type="password" id="password1" value=""></br>
-Повтор: <input type="password" id="password2" value=""></br>
+Адрес: <input type="text" id="address" size="30" value=""></br></br>
+Пароль: <input type="password" id="password" value=""></br>
+
 
 </br>
+<div><span id="info"> </span></div>
 <button id="butSend" onclick=sendPassword()>Отправить</button>
-
 
 </body>
 </html>
