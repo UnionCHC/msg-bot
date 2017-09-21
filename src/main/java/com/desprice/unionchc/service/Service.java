@@ -1,6 +1,8 @@
 package com.desprice.unionchc.service;
 
 
+import com.desprice.unionchc.Constants;
+import com.desprice.unionchc.EthereumSer;
 import com.desprice.unionchc.Options;
 import com.desprice.unionchc.entity.Config;
 import com.desprice.unionchc.sqlite.SQLite;
@@ -47,10 +49,6 @@ public class Service implements Daemon {
             resourceConfig.register(MvcFeature.class);
             resourceConfig.register(JspMvcFeature.class);
             resourceConfig.register(MultiPartFeature.class);
-            resourceConfig.property(JspMvcFeature.TEMPLATE_BASE_PATH, "/WEB-INF/jsp");
-
-            // resourceConfig.property( "contextConfig", "" );
-
 
             Config config = Options.getInstance().getConfig();
             final URI uri = UriBuilder.fromUri("http://" + config.host)
@@ -67,6 +65,7 @@ public class Service implements Daemon {
             SQLite sqlite = SQLite.getInstance();
             sqlite.checkTables();
             BotTelegram.init();
+            EthereumSer.getInstance().setSubscribe(Constants.BOT_ACCOUNT[1], Constants.BOT_CONTRACT);
 
 
         } catch (IOException ex) {
@@ -80,6 +79,7 @@ public class Service implements Daemon {
 
     @Override
     public void stop() throws Exception {
+        EthereumSer.getInstance().unSubscribe();
         SQLite.getInstance().closeConnection();
         if (mServer != null) {
             mServer.shutdown();
@@ -89,6 +89,7 @@ public class Service implements Daemon {
 
     @Override
     public void destroy() {
+        EthereumSer.getInstance().unSubscribe();
         SQLite.getInstance().closeConnection();
         if (mServer != null) {
             mServer.shutdown();

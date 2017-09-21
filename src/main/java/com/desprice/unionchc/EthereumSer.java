@@ -1,14 +1,13 @@
 package com.desprice.unionchc;
 
 import com.desprice.unionchc.exceptions.ExceptionConfig;
+import com.desprice.unionchc.telegram.BotTelegram;
 import org.slf4j.LoggerFactory;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.generated.Uint256;
-import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.request.RawTransaction;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
@@ -18,7 +17,6 @@ import org.web3j.protocol.parity.Parity;
 import org.web3j.protocol.parity.methods.response.NewAccountIdentifier;
 import org.web3j.protocol.parity.methods.response.PersonalUnlockAccount;
 import org.web3j.tx.ClientTransactionManager;
-import org.web3j.tx.TransactionManager;
 import org.web3j.utils.Convert;
 
 import java.io.IOException;
@@ -26,14 +24,11 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.logging.Logger;
 
 import rx.Subscription;
 
-import static org.web3j.protocol.core.methods.request.Transaction.createContractTransaction;
 
 public class EthereumSer {
 
@@ -48,12 +43,12 @@ public class EthereumSer {
 
     private static EthereumSer ourInstance = new EthereumSer();
 
+    Subscription subscription;
+
+
     public static EthereumSer getInstance() {
         return ourInstance;
     }
-
-    Subscription subscription;
-
 
     private EthereumSer() {
         init();
@@ -75,6 +70,18 @@ public class EthereumSer {
             e.printStackTrace();
         }
     }
+
+
+    public void setSubscribe(String address, String contractAdr) {
+        if (subscription == null || subscription.isUnsubscribed())
+            subscription = subscribeTransactions(address, contractAdr);
+    }
+
+    public void unSubscribe() {
+        if (subscription != null && !subscription.isUnsubscribed())
+            subscription.unsubscribe();
+    }
+
 
     public boolean checkUnlock(String address, String password) {
         try {
@@ -153,10 +160,7 @@ public class EthereumSer {
             } else
                 return "transaction hash: " + result.getTransactionHash();
 */
-
-            if (subscription == null || subscription.isUnsubscribed())
-                subscription = subscribeTransactions(address, contractAdr);
-
+/*
             EthSendTransaction result = mParity.personalSignAndSendTransaction(transaction, password).sendAsync().get();
             System.out.println("transaction hash: " + result.toString());
             if (result.hasError()) {
@@ -166,12 +170,24 @@ public class EthereumSer {
                 System.out.println("transaction hash: " + result.getTransactionHash());
                 return "transaction hash: " + result.getTransactionHash();
             }
+*/
 
+
+            mParity.personalSignAndSendTransaction(transaction, password)
+                    .observable().subscribe(x -> {
+                EthSendTransaction result = x;
+                System.out.println("transaction hash: " + result.toString());
+                if (result.hasError()) {
+                    System.out.println("error: " + result.getError().getMessage());
+                    //  return "error: " + result.getError().getMessage();
+                    BotTelegram.getInstance().sendInfoToAddress(address, "error: " + result.getError().getMessage());
+                } else {
+                    System.out.println("transaction hash: " + result.getTransactionHash());
+                    //  return "transaction hash: " + result.getTransactionHash();
+                    BotTelegram.getInstance().sendInfoToAddress(address, "transaction hash:\n" + result.getTransactionHash());
+                }
+            });
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
             e.printStackTrace();
         }
         return "";
@@ -218,7 +234,23 @@ public class EthereumSer {
                 for (MyEvents.MyEventEventResponse event : items) {
                     System.out.println("from: " + event._from);
                     System.out.println("value: " + event._value.getValue());
+                    BotTelegram.getInstance().sendInfoToAddress(event._from.toString(), event._value.getValue().toString());
                 }
+
+                List<MyEvents.Value1EventEventResponse> items1 = events.getValue1EventEvents(receipt);
+                for (MyEvents.Value1EventEventResponse event : items1) {
+                    System.out.println("from: " + event._from);
+                    System.out.println("value: " + event._value.getValue());
+                    BotTelegram.getInstance().sendInfoToAddress(event._from.toString(), event._value.getValue().toString());
+                }
+
+                List<MyEvents.Value2EventEventResponse> items2 = events.getValue2EventEvents(receipt);
+                for (MyEvents.Value2EventEventResponse event : items2) {
+                    System.out.println("from: " + event._from);
+                    System.out.println("value: " + event._value.getValue());
+                    BotTelegram.getInstance().sendInfoToAddress(event._from.toString(), event._value.getValue().toString());
+                }
+
             } catch (IOException e) {
                 e.printStackTrace();
             }

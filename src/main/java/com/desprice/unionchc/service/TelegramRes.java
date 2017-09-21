@@ -99,8 +99,7 @@ public class TelegramRes {
             messageInfo.setStatus(Response.Status.OK);
             messageInfo.setMessage("Update");
             try {
-                BotTelegram bot = new BotTelegram();
-
+                BotTelegram bot = BotTelegram.getInstance();
                 UserBot userBot = TUsers.getInstance().getUser(param.path1);
                 if (userBot.verify == 1) {
                     messageInfo.setStatus(Response.Status.PRECONDITION_FAILED);
@@ -133,7 +132,7 @@ public class TelegramRes {
         } else {
             messageInfo.setStatus(Response.Status.OK);
             try {
-                BotTelegram bot = new BotTelegram();
+                BotTelegram bot = BotTelegram.getInstance();
                 UserBot userBot = TUsers.getInstance().getUser(param.path);
                 userBot.address = param.address;
                 userBot.password = param.password;

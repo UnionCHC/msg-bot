@@ -59,6 +59,17 @@ public class BotTelegram extends TelegramLongPollingBot {
     private UserStep userStep = null;
 
 
+    private static BotTelegram ourInstance;
+
+    public static BotTelegram getInstance() {
+        return ourInstance;
+    }
+
+    private BotTelegram() {
+
+    }
+
+
     private String getPathWebUrl() {
         String result;
         Config config = Options.getInstance().getConfig();
@@ -77,10 +88,13 @@ public class BotTelegram extends TelegramLongPollingBot {
     }
 
     public static void init() {
+        if (null != ourInstance)
+            return;
         ApiContextInitializer.init();
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
         try {
-            telegramBotsApi.registerBot(new BotTelegram());
+            ourInstance = new BotTelegram();
+            telegramBotsApi.registerBot(ourInstance);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
@@ -139,9 +153,9 @@ public class BotTelegram extends TelegramLongPollingBot {
                     callContract(update, "incValue1");
                 else if (menuText.equals(CALL_INC2))
                     callContract(update, "incValue2");
-                else if (menuText.equals(CALL_GET1)   )
+                else if (menuText.equals(CALL_GET1))
                     callContractGet(update, 1);
-                else if (menuText.equals(CALL_GET2)   )
+                else if (menuText.equals(CALL_GET2))
                     callContractGet(update, 2);
 
                 else if (menuText.equals("*"))
@@ -185,7 +199,7 @@ public class BotTelegram extends TelegramLongPollingBot {
         sendMessage.setText(text);
 
         try {
-            sendMessage(sendMessage);
+            execute(sendMessage);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
@@ -196,18 +210,17 @@ public class BotTelegram extends TelegramLongPollingBot {
             EditMessageText editMessage = new EditMessageText();
             editMessage.setChatId(userBot.userId.toString());
             editMessage.setMessageId(userBot.messageId.intValue());
-            if (null != userBot.address && !userBot.address.isEmpty())
+            if (null != userBot.address && !userBot.address.isEmpty()) {
                 editMessage.setText("Ваш адрес\n" + userBot.address);
-            else
-                editMessageText(editMessage);
-            editMessageText(editMessage);
+                execute(editMessage);
 
-            SendMessage sendMessage = new SendMessage();
-            sendMessage.enableMarkdown(true);
-            sendMessage.setChatId(userBot.userId.toString());
-            sendMessage.setReplyMarkup(getMenuKeyboard());
-            sendMessage.setText("Вам доступны команды");
-            sendMessage(sendMessage);
+                SendMessage sendMessage = new SendMessage();
+                sendMessage.enableMarkdown(true);
+                sendMessage.setChatId(userBot.userId.toString());
+                sendMessage.setReplyMarkup(getMenuKeyboard());
+                sendMessage.setText("Вам доступны команды");
+                execute(sendMessage);
+            }
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
@@ -222,7 +235,7 @@ public class BotTelegram extends TelegramLongPollingBot {
             if (userBot.verify == 1) {
                 sendMessage.setText("Вы зарегистрированы");
                 sendMessage.setReplyMarkup(getMenuKeyboard());
-                sendMessage(sendMessage);
+                execute(sendMessage);
                 return;
             }
             String path = getPathWebUrl();
@@ -261,7 +274,7 @@ public class BotTelegram extends TelegramLongPollingBot {
             markup.setKeyboard(keyboard);
             sendMessage.setReplyMarkup(markup);
 
-            Message sendOk = sendMessage(sendMessage);
+            Message sendOk = execute(sendMessage);
             System.out.println(sendOk.getMessageId());
             userBot.messageId = sendOk.getMessageId().longValue();
             TUsers.getInstance().setMessage(userBot);
@@ -288,7 +301,7 @@ public class BotTelegram extends TelegramLongPollingBot {
                     sendMessageEdit.setChatId(message.getChatId().toString());
                     sendMessageEdit.setMessageId(message.getMessageId());
                     sendMessageEdit.setText("Отправьте Ваш адрес");
-                    editMessageText(sendMessageEdit);
+                    execute(sendMessageEdit);
                     userBot = new UserBot(message.getChat().getId(), message.getChat().getFirstName(), message.getChat().getLastName(), message.getChat().getUserName());
                     tUsers.checkUser(userBot);
                     userStep.userId = userBot.userId;
@@ -377,7 +390,7 @@ public class BotTelegram extends TelegramLongPollingBot {
             editMessage.setMessageId(message.getMessageId());
             // editMessage.setText("Вы добавлены в систему");
             editMessage.setText("Отправьте Ваш пароль");
-            editMessageText(editMessage);
+            execute(editMessage);
             userStep.step = Constants.STEP_PASSWORD;
             TStep.getInstance().updateStep(userStep);
 
@@ -385,7 +398,7 @@ public class BotTelegram extends TelegramLongPollingBot {
             SendMessage sendMessage = initMessage(message, true);
             sendMessage.setText("Вам доступны новые команды");
             sendMessage.setReplyMarkup(getMenuKeyboard());
-            sendMessage(sendMessage);
+            execute(sendMessage);
 */
         } catch (TelegramApiException e) {
             e.printStackTrace();
@@ -401,7 +414,7 @@ public class BotTelegram extends TelegramLongPollingBot {
                 SendMessage sendMessage = initMessage(message, false);
                 sendMessage.setText("Вы вышли из системы");
                 sendMessage.setReplyMarkup(getMenuStart());
-                sendMessage(sendMessage);
+                execute(sendMessage);
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
@@ -416,7 +429,7 @@ public class BotTelegram extends TelegramLongPollingBot {
             sendMessage.setText("Ваша информация\n" +
                     "Адрес: " + userBot.address);
             sendMessage.setReplyMarkup(getMenuKeyboard());
-            sendMessage(sendMessage);
+            execute(sendMessage);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
@@ -432,7 +445,7 @@ public class BotTelegram extends TelegramLongPollingBot {
                 sendMessage.setText("Ваш баланс: " + Convert.fromWei(new BigDecimal(balance), Convert.Unit.ETHER));
             else
                 sendMessage.setText("Ваш баланс: 0");
-            sendMessage(sendMessage);
+            execute(sendMessage);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
@@ -442,29 +455,42 @@ public class BotTelegram extends TelegramLongPollingBot {
     private void callContract(Update update, String functionName) {
         String result = EthereumSer.getInstance().sendContract(userBot.address, Constants.BOT_CONTRACT, functionName, userBot.password);
         // sendMsg(update.getMessage(), result, true);
-        sendMsg(update.getMessage(), "Контракт отправлен", true);
+        sendMsg(update.getMessage(), "Контракт отправлен", false);
     }
 
     private void callContractGet(Update update, int value) {
-       BigInteger result = EthereumSer.getInstance().getValueEvent(userBot.address, Constants.BOT_CONTRACT, value);
-        if(null != result)
-        sendMsg(update.getMessage(), "Значение: "+ result.toString(), true);
+        BigInteger result = EthereumSer.getInstance().getValueEvent(userBot.address, Constants.BOT_CONTRACT, value);
+        if (null != result)
+            sendMsg(update.getMessage(), "Значение: " + result.toString(), false);
         else
-            sendMsg(update.getMessage(), "Значение нет: ", true);
+            sendMsg(update.getMessage(), "Значение нет: ", false);
     }
 
+    public void sendInfoToAddress(String address, String value) {
+        UserBot userTo = TUsers.getInstance().getUserFromAddress(address);
+        if (userTo.userId > 0) {
+            try {
+                SendMessage sendMessage = new SendMessage();
+                sendMessage.enableMarkdown(true);
+                sendMessage.setChatId(userBot.userId.toString());
+                sendMessage.setText("Значение: " + value);
+                execute(sendMessage);
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     private void hideButton(Message message) {
         SendMessage sendMessage = initMessage(message, true);
         sendMessage.setText("Убрать Кнопки в низу");
         sendMessage.setReplyMarkup(hideKeyboard());
         try {
-            sendMessage(sendMessage);
+            execute(sendMessage);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
     }
-
 
     private static ReplyKeyboardMarkup getMenuStart() {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();

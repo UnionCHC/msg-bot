@@ -18,7 +18,7 @@ project.ext {
 dependencies {
 
     // https://mvnrepository.com/artifact/javax.ws.rs/javax.ws.rs-api
-    compile group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.1'
+   // compile group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.1'
 
     // https://mvnrepository.com/artifact/org.glassfish.grizzly/grizzly-http-servlet
     compile group: 'org.glassfish.grizzly', name: 'grizzly-http-servlet', version: project.grizzlyVersion
@@ -76,49 +76,3 @@ task copyToLib(type: Copy) {
 
 build.dependsOn(copyToLib)
 
-/*
-
-    compile 'javax.ws.rs:javax.ws.rs-api:2.1'
-
-   // https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api
-   // provided group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.0'
-
-    compile group: 'org.glassfish.grizzly', name: 'grizzly-framework', version:  project.grizzlyVersion
-    compile group: 'org.glassfish.grizzly', name: 'grizzly-http', version:  project.grizzlyVersion
-    compile group: 'org.glassfish.grizzly', name: 'grizzly-http-server', version:  project.grizzlyVersion
-
-    // https://mvnrepository.com/artifact/org.glassfish.jersey.inject/jersey-hk2
-    compile group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: '2.26'
-
-    compile group: 'org.glassfish.jersey.core', name: 'jersey-server', version: '2.26'
-
-    compile group: 'org.glassfish.jersey.ext', name: 'jersey-mvc', version: '2.26'
-    compile group: 'org.glassfish.jersey.ext', name: 'jersey-mvc-jsp', version: '2.26'
-    compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet-core', version: '2.26'
-
-    compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-grizzly2-http', version: '2.26'
-
-    compile 'org.glassfish.jersey.containers:jersey-container-servlet:2.26'
-    compile 'org.glassfish.jersey.containers:jersey-container-servlet-core:2.26'
-    compile 'org.glassfish.jersey.media:jersey-media-json-jackson:2.26'
-    compile 'org.glassfish.jersey.media:jersey-media-multipart:2.26'
-
-
-// https://mvnrepository.com/artifact/org.glassfish.jersey.inject/jersey-hk2
-// compile group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: '2.26'
-
-compile group: 'org.glassfish.jersey.ext', name: 'jersey-mvc', version: '2.26'
-compile group: 'org.glassfish.jersey.ext', name: 'jersey-mvc-jsp', version: '2.26'
-
-
-compile group: 'org.glassfish.jersey.core', name: 'jersey-server', version: '2.25.1'
-compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-grizzly2-http', version: '2.25.1'
-compile 'org.glassfish.jersey.media:jersey-media-json-jackson:2.25.1'
-compile 'org.glassfish.jersey.media:jersey-media-multipart:2.25.1'
-
-
-compile group: 'org.glassfish.grizzly', name: 'grizzly-http-server', version: '2.3.30'
-
-
-
-*/

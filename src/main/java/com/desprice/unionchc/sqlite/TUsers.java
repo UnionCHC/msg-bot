@@ -91,17 +91,7 @@ public class TUsers {
             ps.setLong(1, userId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                userBot.userId = rs.getLong(UserBot.USER_ID);
-                userBot.messageId = rs.getLong(UserBot.MESSAGE_ID);
-                userBot.verify = rs.getInt(UserBot.VERIFY);
-                userBot.firstName = rs.getString(UserBot.FIRSTNAME);
-                userBot.lastName = rs.getString(UserBot.LASTNAME);
-                userBot.userName = rs.getString(UserBot.USERNAME);
-                userBot.wallet = rs.getString(UserBot.WALLET);
-                userBot.address = rs.getString(UserBot.ADDRESS);
-                userBot.password = rs.getString(UserBot.PASSWORD);
-                System.out.println(rs.getLong(UserBot.USER_ID) + "\t" +
-                        rs.getString(UserBot.FIRSTNAME) + "\t");
+                userFromDb(userBot, rs);
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -109,6 +99,35 @@ public class TUsers {
         return userBot;
     }
 
+    public UserBot getUserFromAddress(String address) {
+        UserBot userBot = new UserBot();
+        String sql = "SELECT * FROM " + TABLE_USERS + " WHERE " + UserBot.ADDRESS + " = ?";
+        try {
+            PreparedStatement ps = mConnection.prepareStatement(sql);
+            ps.setString(1, address);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                userFromDb(userBot, rs);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return userBot;
+    }
+
+    private void userFromDb(UserBot userBot, ResultSet rs) throws SQLException {
+        userBot.userId = rs.getLong(UserBot.USER_ID);
+        userBot.messageId = rs.getLong(UserBot.MESSAGE_ID);
+        userBot.verify = rs.getInt(UserBot.VERIFY);
+        userBot.firstName = rs.getString(UserBot.FIRSTNAME);
+        userBot.lastName = rs.getString(UserBot.LASTNAME);
+        userBot.userName = rs.getString(UserBot.USERNAME);
+        userBot.wallet = rs.getString(UserBot.WALLET);
+        userBot.address = rs.getString(UserBot.ADDRESS);
+        userBot.password = rs.getString(UserBot.PASSWORD);
+        System.out.println(rs.getLong(UserBot.USER_ID) + "\t" +
+                rs.getString(UserBot.FIRSTNAME) + "\t");
+    }
 
     public void updateWallet(UserBot user) {
         String sql = "UPDATE " + TABLE_USERS + " SET " +
