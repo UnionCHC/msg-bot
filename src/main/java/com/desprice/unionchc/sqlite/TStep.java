@@ -21,7 +21,7 @@ public class TStep {
     private Connection mConnection = SQLite.getInstance().getConnection();
 
 
-    public void executeSql(String sql) {
+    private void executeSql(String sql) {
         SQLite.getInstance().executeSql(mConnection, sql);
     }
 
@@ -39,6 +39,11 @@ public class TStep {
         executeSql(sql);
     }
 
+
+    public void updateStep(UserStep userStep, int step) {
+        userStep.step = step;
+        updateStep(userStep);
+    }
 
     public void updateStep(UserStep step) {
         String sql = "INSERT OR REPLACE INTO " + TABLE_STEP + "(" +

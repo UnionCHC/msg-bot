@@ -18,6 +18,7 @@ import org.web3j.protocol.parity.methods.response.NewAccountIdentifier;
 import org.web3j.protocol.parity.methods.response.PersonalUnlockAccount;
 import org.web3j.tx.ClientTransactionManager;
 import org.web3j.utils.Convert;
+import rx.Subscription;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -26,8 +27,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
-import rx.Subscription;
 
 
 public class EthereumSer {
@@ -43,7 +42,7 @@ public class EthereumSer {
 
     private static EthereumSer ourInstance = new EthereumSer();
 
-    Subscription subscription;
+    private Subscription subscription;
 
 
     public static EthereumSer getInstance() {
@@ -174,8 +173,8 @@ public class EthereumSer {
 
 
             mParity.personalSignAndSendTransaction(transaction, password)
-                    .observable().subscribe(x -> {
-                EthSendTransaction result = x;
+                    .observable().subscribe(result -> {
+               // EthSendTransaction result = x;
                 System.out.println("transaction hash: " + result.toString());
                 if (result.hasError()) {
                     System.out.println("error: " + result.getError().getMessage());
@@ -212,9 +211,7 @@ public class EthereumSer {
             }
             System.out.println(uint256.get().getValue());
             return uint256.get().getValue();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();

@@ -1,11 +1,10 @@
 package com.desprice.unionchc.service;
 
 
+import com.desprice.unionchc.Constants;
 import com.desprice.unionchc.Utils;
-import com.desprice.unionchc.entity.JspAddress;
-import com.desprice.unionchc.entity.JspMessage;
-import com.desprice.unionchc.entity.JspPassord;
-import com.desprice.unionchc.entity.UserBot;
+import com.desprice.unionchc.entity.*;
+import com.desprice.unionchc.sqlite.TStep;
 import com.desprice.unionchc.sqlite.TUsers;
 import com.desprice.unionchc.telegram.BotTelegram;
 import org.glassfish.jersey.server.mvc.Viewable;
@@ -45,10 +44,8 @@ public class TelegramRes {
     @Path("password/{user:\\d+}/{msg:\\d+}")
     @Produces(MediaType.TEXT_HTML)
     public Response getPassword(@PathParam("user") String userName, @PathParam("msg") String msg) {
-
         String html = getResourceFile("html/password.html");
-        Response response = Response.ok(html).build();
-        return response;
+        return Response.ok(html).build();
     }
 
     @GET
@@ -60,13 +57,27 @@ public class TelegramRes {
         return response;
     }
 
+    @GET
+    @Path("contract2/{user:\\d+}/{msg:\\d+}")
+    @Produces(MediaType.TEXT_HTML)
+    public Response getContract2(@PathParam("user") Long userId, @PathParam("msg") String msg) {
+        String html;
+        UserStep step = TStep.getInstance().getStep(userId, Constants.BOT_TELEGRAM);
+        if (step.step != Constants.STEP_CONTRACT2)
+            html = getResourceFile("html/contract2no.html");
+        else
+            html = getResourceFile("html/contract2.html");
+        Response response = Response.ok(html).build();
+        return response;
+    }
+
+
     private String getResourceFile(String fileName) {
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
 
         BufferedReader bReader = new BufferedReader(new InputStreamReader(inputStream));
-        StringBuffer sb = new StringBuffer();
-        String line = null;
-
+        StringBuilder sb = new StringBuilder();
+        String line;
         //read file line by line
         try {
             while ((line = bReader.readLine()) != null) {
@@ -84,7 +95,7 @@ public class TelegramRes {
     @Path("/password/update/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response passwordUpdate(@NotNull JspPassord param) {
+    public Response passwordUpdate(@NotNull JspPassword param) {
 
         LOGGER.debug("passwordUpdate" + Utils.jsonToString(param));
 
@@ -113,6 +124,7 @@ public class TelegramRes {
                     messageInfo.setMessage("Вам создан адрес");
                 }
             } catch (Exception ex) {
+                LOGGER.debug(ex.getMessage());
             }
         }
         return Response.status(Response.Status.OK).entity(messageInfo).build();
@@ -145,10 +157,48 @@ public class TelegramRes {
                     messageInfo.setMessage("Вы вошли в систему");
                 }
             } catch (Exception ex) {
+                LOGGER.debug(ex.getMessage());
             }
         }
         return Response.status(Response.Status.OK).entity(messageInfo).build();
     }
+
+
+    @POST
+    @Path("/contract2/update/")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response contract2Update(@NotNull JspPassword param) {
+        LOGGER.debug("contract2Update" + Utils.jsonToString(param));
+        JspMessage messageInfo = new JspMessage();
+        if (param.password1.isEmpty()) {
+            messageInfo.setStatus(Response.Status.PRECONDITION_FAILED);
+            messageInfo.setMessage("Укажите пароль");
+        } else {
+            messageInfo.setStatus(Response.Status.OK);
+            try {
+                BotTelegram bot = BotTelegram.getInstance();
+                UserBot userBot = TUsers.getInstance().getUser(param.path1);
+                if (!param.password1.equals(userBot.password)) {
+                    messageInfo.setStatus(Response.Status.PRECONDITION_FAILED);
+                    messageInfo.setMessage("Не верный пароль");
+                } else {
+                    bot.setUserBot(userBot);
+                    if (!bot.contract2update()) {
+                        messageInfo.setStatus(Response.Status.PRECONDITION_FAILED);
+                        messageInfo.setMessage("Ошибка");
+                    } else {
+                        messageInfo.setStatus(Response.Status.OK);
+                        messageInfo.setMessage("Контракт отправлен");
+                    }
+                }
+            } catch (Exception ex) {
+                LOGGER.debug(ex.getMessage());
+            }
+        }
+        return Response.status(Response.Status.OK).entity(messageInfo).build();
+    }
+
 
     // not work
     @GET
@@ -156,8 +206,7 @@ public class TelegramRes {
     @Produces(MediaType.TEXT_HTML)
     public Response getInfo() {
         Viewable viewable = new Viewable("/info.jsp");
-        Response response = Response.ok(viewable).build();
-        return response;
+        return Response.ok(viewable).build();
     }
 
 

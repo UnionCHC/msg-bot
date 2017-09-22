@@ -1,6 +1,6 @@
 package com.desprice.unionchc.entity;
 
-public class JspPassord {
+public class JspPassword {
 
     public String password1;
     public String password2;

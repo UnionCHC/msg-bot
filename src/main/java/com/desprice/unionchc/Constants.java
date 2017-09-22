@@ -18,6 +18,7 @@ public class Constants {
     public static final int STEP_EXISTS_START = 100;
     public static final int STEP_EXISTS_ADDRESS = 110;
     public static final int STEP_PASSWORD = 120;
+    public static final int STEP_CONTRACT2 = 130;
 
 
 }

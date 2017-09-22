@@ -35,25 +35,26 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.desprice.unionchc.Constants.STEP_EXISTS_ADDRESS;
-import static com.desprice.unionchc.Constants.STEP_EXISTS_START;
+import static com.desprice.unionchc.Constants.*;
 
 public class BotTelegram extends TelegramLongPollingBot {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BotTelegram.class);
 
-    public static final String DATA_START_NEW = "data_start_new";
-    public static final String DATA_START_EXISTS = "data_start_exists";
-    public static final String CALL_ENTER = "Войти";
-    public static final String CALL_EXIT = "Выйти";
-    public static final String CALL_BALANCE = "Баланс";
-    public static final String CALL_INFO = "Информация";
-    public static final String CALL_CONTRACT = "Контракт";
+    private static final String DATA_START_NEW = "data_start_new";
+    private static final String DATA_START_EXISTS = "data_start_exists";
+    private static final String DATA_CONTRACT2_CANCEL = "data_contract2_cancel";
 
-    public static final String CALL_INC1 = "Доб 1";
-    public static final String CALL_GET1 = "Пол 1";
-    public static final String CALL_INC2 = "Доб 2";
-    public static final String CALL_GET2 = "Пол 2";
+    private static final String CALL_ENTER = "Войти";
+    private static final String CALL_EXIT = "Выйти";
+    private static final String CALL_BALANCE = "Баланс";
+    private static final String CALL_INFO = "Информация";
+    private static final String CALL_CONTRACT = "Контракт";
+
+    private static final String CALL_INC1 = "Доб 1";
+    private static final String CALL_GET1 = "Пол 1";
+    private static final String CALL_INC2 = "Доб 2";
+    private static final String CALL_GET2 = "Пол 2";
 
     private UserBot userBot = null;
     private UserStep userStep = null;
@@ -152,7 +153,8 @@ public class BotTelegram extends TelegramLongPollingBot {
                 else if (menuText.equals(CALL_INC1))
                     callContract(update, "incValue1");
                 else if (menuText.equals(CALL_INC2))
-                    callContract(update, "incValue2");
+                    //callContract(update, "incValue2");
+                    contact2start(update);
                 else if (menuText.equals(CALL_GET1))
                     callContractGet(update, 1);
                 else if (menuText.equals(CALL_GET2))
@@ -180,6 +182,8 @@ public class BotTelegram extends TelegramLongPollingBot {
             } else if (query.getData().equals(DATA_START_EXISTS)) {
                 userStep.step = Constants.STEP_EXISTS_START;
                 startExists(update);
+            } else if (query.getData().equals(DATA_CONTRACT2_CANCEL)) {
+                contract2Cancel(update);
             }
         }
     }
@@ -394,12 +398,6 @@ public class BotTelegram extends TelegramLongPollingBot {
             userStep.step = Constants.STEP_PASSWORD;
             TStep.getInstance().updateStep(userStep);
 
-            /*
-            SendMessage sendMessage = initMessage(message, true);
-            sendMessage.setText("Вам доступны новые команды");
-            sendMessage.setReplyMarkup(getMenuKeyboard());
-            execute(sendMessage);
-*/
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
@@ -420,7 +418,6 @@ public class BotTelegram extends TelegramLongPollingBot {
             }
         }
     }
-
 
     private void getInfo(Update update) {
         try {
@@ -481,6 +478,91 @@ public class BotTelegram extends TelegramLongPollingBot {
         }
     }
 
+
+    private void contact2start(Update update) {
+        Message messageIn = update.getMessage();
+        SendMessage sendMessage = initMessage(messageIn, true);
+        try {
+            if (userBot.verify == 0) {
+                sendMessage.setText("Вам нужно зарегистрироваться");
+                sendMessage.setReplyMarkup(hideKeyboard());
+                execute(sendMessage);
+                return;
+            }
+            String path = getPathWebUrl();
+            path += "telegram/contract2/" + messageIn.getChat().getId() +
+                    "/" + messageIn.getMessageId();
+            System.out.println(path);
+
+            String text = "Подтвердите контракт" +
+                    "\n\n  <a href=\" " + path + "\"> Контракт</a>" +
+                    "" + path;
+            sendMessage.setText(text);
+            sendMessage.setParseMode("html");
+            TStep.getInstance().updateStep(userStep, Constants.STEP_CONTRACT2);
+
+            InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+            List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+            List<InlineKeyboardButton> row = new ArrayList<>();
+            InlineKeyboardButton button = new InlineKeyboardButton();
+            button.setText("Контракт");
+            button.setUrl(path);
+            row.add(button);
+
+            button = new InlineKeyboardButton();
+            button.setText("Отмена");
+            button.setCallbackData(DATA_CONTRACT2_CANCEL);
+            row.add(button);
+
+
+            keyboard.add(row);
+            markup.setKeyboard(keyboard);
+            sendMessage.setReplyMarkup(markup);
+
+            Message sendOk = execute(sendMessage);
+            System.out.println(sendOk.getMessageId());
+            userBot.messageId = sendOk.getMessageId().longValue();
+            TUsers.getInstance().setMessage(userBot);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean contract2update() {
+        userStep = TStep.getInstance().getStep(userBot.userId, Constants.BOT_TELEGRAM);
+        if (userStep.step != STEP_CONTRACT2)
+            return false;
+
+        EditMessageText sendMessageEdit = new EditMessageText();
+        sendMessageEdit.setChatId(userBot.userId);
+        sendMessageEdit.setMessageId(userBot.messageId.intValue());
+        sendMessageEdit.setText("Контракт отправлен");
+        try {
+            execute(sendMessageEdit);
+            String result = EthereumSer.getInstance().sendContract(userBot.address, Constants.BOT_CONTRACT, "incValue2", userBot.password);
+            TStep.getInstance().updateStep(userStep, Constants.STEP_NONE);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    private void contract2Cancel(Update update) {
+        if (userStep.step != STEP_CONTRACT2)
+            return;
+        try {
+            EditMessageText sendMessageEdit = new EditMessageText();
+            sendMessageEdit.setChatId(userBot.userId);
+            sendMessageEdit.setMessageId(userBot.messageId.intValue());
+            sendMessageEdit.setText("Отмена");
+            execute(sendMessageEdit);
+            TStep.getInstance().updateStep(userStep, Constants.STEP_NONE);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void hideButton(Message message) {
         SendMessage sendMessage = initMessage(message, true);
         sendMessage.setText("Убрать Кнопки в низу");
@@ -492,7 +574,7 @@ public class BotTelegram extends TelegramLongPollingBot {
         }
     }
 
-    private static ReplyKeyboardMarkup getMenuStart() {
+    private ReplyKeyboardMarkup getMenuStart() {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setSelective(true);
         replyKeyboardMarkup.setResizeKeyboard(true);
@@ -508,7 +590,7 @@ public class BotTelegram extends TelegramLongPollingBot {
     }
 
 
-    private static ReplyKeyboardMarkup getMenuKeyboard() {
+    private ReplyKeyboardMarkup getMenuKeyboard() {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setSelective(true);
         replyKeyboardMarkup.setResizeKeyboard(true);

@@ -22,7 +22,7 @@
             success: function (dataReturn) {
                 if (null != dataReturn && dataReturn.status == 200) {
                     //alert('Вам создан адрес' + dataReturn.message);
-                    $('#info').css('background-color', '');
+                    $('#info').css('background-color', '#84e488');
                 } else {
                     $('#info').css('background-color', 'red');
                     //alert('Ошибка:' + dataReturn.message);
@@ -41,7 +41,7 @@
 <body>
 <H3>Укажите Ваш адрес и пароль</H3>
 <input hidden type="text" name="path" id="path"/>
-<input hidden type="text" id="msg" value="REPLACE_MSG_ID"/>
+<input hidden type="text" id="msg" value=""/>
 Адрес: <input type="text" id="address" size="30" value=""></br></br>
 Пароль: <input type="password" id="password" value=""></br>
 
