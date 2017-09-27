@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Подтверждение контракта 2</title>
 </head>
 
@@ -16,12 +17,14 @@
             url: '/telegram/contract2/update',
             data: JSON.stringify({
                 "password1": $("#password").val(),
-                "path1": window.location.href.split('/')[5].trim(),
+                "path1": window.location.href.split('/')[5].trim()
             }),
             success: function (dataReturn) {
                 if (null != dataReturn && dataReturn.status == 200) {
                     //  alert( dataReturn.message);
                     $('#info').css('background-color', '#84e488');
+                    CloseWithWindowOpenTrick();
+                    //  window.top.close();
                 } else {
                     // alert('Ошибка:' + dataReturn.message);
 
@@ -36,6 +39,12 @@
             }
         });
     }
+
+    function CloseWithWindowOpenTrick() {
+        var objWindow = window.open(location.href, "_self");
+        objWindow.close();
+    }
+
 
 </script>
 

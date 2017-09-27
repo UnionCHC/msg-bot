@@ -49,13 +49,15 @@ public class TStep {
         String sql = "INSERT OR REPLACE INTO " + TABLE_STEP + "(" +
                 UserStep.USER_ID + " , " +
                 UserStep.BOT_ID + " , " +
-                UserStep.STEP + "  " +
-                ") VALUES (?, ?, ?)";
+                UserStep.STEP + " ,  " +
+                UserStep.VALUE + "  " +
+                ") VALUES (?, ?, ? ,?)";
         try {
             PreparedStatement ps = mConnection.prepareStatement(sql);
             ps.setLong(1, step.userId);
             ps.setInt(2, step.botId);
             ps.setInt(3, step.step);
+            ps.setLong(4, step.value);
             int numRowsInserted = ps.executeUpdate();
             System.out.println("updateStep numRowsInserted:" + numRowsInserted);
         } catch (SQLException e) {
@@ -67,7 +69,7 @@ public class TStep {
     public UserStep getStep(Long userId, int botid) {
         UserStep userStep = new UserStep(userId, botid);
         if (userId == 0) return userStep;
-        String sql = "SELECT " + UserStep.STEP + " FROM " + TABLE_STEP + " WHERE "
+        String sql = "SELECT " + UserStep.STEP + "," + UserStep.VALUE + " FROM " + TABLE_STEP + " WHERE "
                 + UserStep.USER_ID + " = ? AND "
                 + UserStep.BOT_ID + " = ?";
         try {
@@ -77,6 +79,7 @@ public class TStep {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 userStep.step = rs.getInt(UserStep.STEP);
+                userStep.value = rs.getLong(UserStep.VALUE);
                 System.out.println("getStep: " + userStep.step);
             }
 

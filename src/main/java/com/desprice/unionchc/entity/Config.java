@@ -12,8 +12,9 @@ public class Config {
     public String host;
     public int port;
     public String server;
+    @JsonProperty("socket_file")
+    public String socketFile;
     @JsonProperty("telegram_res")
     public String telegramRes;
     public Map<String, String> sqlite;
-
 }

@@ -51,10 +51,10 @@ public class BotTelegram extends TelegramLongPollingBot {
     private static final String CALL_INFO = "Информация";
     private static final String CALL_CONTRACT = "Контракт";
 
-    private static final String CALL_INC1 = "Доб 1";
-    private static final String CALL_GET1 = "Пол 1";
-    private static final String CALL_INC2 = "Доб 2";
-    private static final String CALL_GET2 = "Пол 2";
+    private static final String CALL_INC1 = "Добавить 1";
+    private static final String CALL_GET1 = "Получить 1";
+    private static final String CALL_INC2 = "Добавить 2";
+    private static final String CALL_GET2 = "Получить 2";
 
     private UserBot userBot = null;
     private UserStep userStep = null;
@@ -69,7 +69,6 @@ public class BotTelegram extends TelegramLongPollingBot {
     private BotTelegram() {
 
     }
-
 
     private String getPathWebUrl() {
         String result;
@@ -166,7 +165,7 @@ public class BotTelegram extends TelegramLongPollingBot {
                     sendMsg(message, "Я не знаю что ответить на это\n" +
                             " Доступны команды:\n" +
                             "/start\n" +
-                            "", true);
+                            "", false);
             }
         } else if (update.hasCallbackQuery()) {
             CallbackQuery query = update.getCallbackQuery();
@@ -233,7 +232,7 @@ public class BotTelegram extends TelegramLongPollingBot {
 
     private void getStart(Update update) {
         Message messageIn = update.getMessage();
-        SendMessage sendMessage = initMessage(messageIn, true);
+        SendMessage sendMessage = initMessage(messageIn, false);
         try {
             // if (null != userBot.password && !userBot.password.isEmpty()) {
             if (userBot.verify == 1) {
@@ -424,9 +423,13 @@ public class BotTelegram extends TelegramLongPollingBot {
             Message message = update.getMessage();
             SendMessage sendMessage = initMessage(message, false);
             sendMessage.setText("Ваша информация\n" +
-                    "Адрес: " + userBot.address);
+                    "Адрес: \n");
             sendMessage.setReplyMarkup(getMenuKeyboard());
             execute(sendMessage);
+
+            sendMessage.setText(userBot.address);
+            execute(sendMessage);
+
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
@@ -438,8 +441,12 @@ public class BotTelegram extends TelegramLongPollingBot {
             SendMessage sendMessage = initMessage(message, false);
 
             BigInteger balance = EthereumSer.getInstance().getBalance(userBot.address);
+            //BigInteger gasPrice = EthereumSer.getInstance().getGasPrice();
+
             if (null != balance)
-                sendMessage.setText("Ваш баланс: " + Convert.fromWei(new BigDecimal(balance), Convert.Unit.ETHER));
+                sendMessage.setText("Ваш баланс: " + Convert.fromWei(new BigDecimal(balance), Convert.Unit.ETHER)
+                        //  + " "+ gasPrice
+                );
             else
                 sendMessage.setText("Ваш баланс: 0");
             execute(sendMessage);
@@ -481,7 +488,7 @@ public class BotTelegram extends TelegramLongPollingBot {
 
     private void contact2start(Update update) {
         Message messageIn = update.getMessage();
-        SendMessage sendMessage = initMessage(messageIn, true);
+        SendMessage sendMessage = initMessage(messageIn, false);
         try {
             if (userBot.verify == 0) {
                 sendMessage.setText("Вам нужно зарегистрироваться");
@@ -564,7 +571,7 @@ public class BotTelegram extends TelegramLongPollingBot {
     }
 
     private void hideButton(Message message) {
-        SendMessage sendMessage = initMessage(message, true);
+        SendMessage sendMessage = initMessage(message, false);
         sendMessage.setText("Убрать Кнопки в низу");
         sendMessage.setReplyMarkup(hideKeyboard());
         try {
@@ -600,19 +607,21 @@ public class BotTelegram extends TelegramLongPollingBot {
         KeyboardRow keyboardFirstRow = new KeyboardRow();
         keyboardFirstRow.add(CALL_BALANCE);
         keyboardFirstRow.add(CALL_INFO);
-        keyboardFirstRow.add(CALL_CONTRACT);
+        //  keyboardFirstRow.add(CALL_CONTRACT);
         keyboardFirstRow.add(CALL_EXIT);
         keyboard.add(keyboardFirstRow);
 
 
         KeyboardRow keyboardtRow2 = new KeyboardRow();
-        keyboardtRow2.add(CALL_INC1);
         keyboardtRow2.add(CALL_GET1);
+        keyboardtRow2.add(CALL_INC1);
 
-        keyboardtRow2.add(CALL_INC2);
-        keyboardtRow2.add(CALL_GET2);
+        KeyboardRow keyboardtRow3 = new KeyboardRow();
+        keyboardtRow3.add(CALL_GET2);
+        keyboardtRow3.add(CALL_INC2);
 
         keyboard.add(keyboardtRow2);
+        keyboard.add(keyboardtRow3);
 
 
         replyKeyboardMarkup.setKeyboard(keyboard);

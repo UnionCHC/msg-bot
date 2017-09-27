@@ -3,7 +3,9 @@ package com.desprice.unionchc.service;
 
 import com.desprice.unionchc.Constants;
 import com.desprice.unionchc.Utils;
-import com.desprice.unionchc.entity.*;
+import com.desprice.unionchc.entity.JspMessage;
+import com.desprice.unionchc.entity.UserBot;
+import com.desprice.unionchc.entity.UserStep;
 import com.desprice.unionchc.sqlite.TStep;
 import com.desprice.unionchc.sqlite.TUsers;
 import com.desprice.unionchc.telegram.BotTelegram;
@@ -146,15 +148,21 @@ public class TelegramRes {
             try {
                 BotTelegram bot = BotTelegram.getInstance();
                 UserBot userBot = TUsers.getInstance().getUser(param.path);
-                userBot.address = param.address;
-                userBot.password = param.password;
-                bot.setUserBot(userBot);
-                if (!bot.checkAddress()) {
+
+                if (userBot.verify == 1) {
                     messageInfo.setStatus(Response.Status.PRECONDITION_FAILED);
-                    messageInfo.setMessage("Неверный пароль или адрес");
+                    messageInfo.setMessage("Вы уже вошли");
                 } else {
-                    messageInfo.setStatus(Response.Status.OK);
-                    messageInfo.setMessage("Вы вошли в систему");
+                    userBot.address = param.address;
+                    userBot.password = param.password;
+                    bot.setUserBot(userBot);
+                    if (!bot.checkAddress()) {
+                        messageInfo.setStatus(Response.Status.PRECONDITION_FAILED);
+                        messageInfo.setMessage("Неверный пароль или адрес");
+                    } else {
+                        messageInfo.setStatus(Response.Status.OK);
+                        messageInfo.setMessage("Вы вошли в систему");
+                    }
                 }
             } catch (Exception ex) {
                 LOGGER.debug(ex.getMessage());
@@ -207,6 +215,25 @@ public class TelegramRes {
     public Response getInfo() {
         Viewable viewable = new Viewable("/info.jsp");
         return Response.ok(viewable).build();
+    }
+
+
+    static class JspAddress {
+
+        public String address;
+        public String password;
+        public Long path;
+
+    }
+
+
+    static class JspPassword {
+
+        public String password1;
+        public String password2;
+        public Long path1;
+        public Long path2;
+
     }
 
 

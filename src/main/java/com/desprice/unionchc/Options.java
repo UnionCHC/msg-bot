@@ -22,7 +22,7 @@ public class Options {
         try {
             mConfig = mapper.readValue(is, Config.class);
         } catch (IOException e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("Error config file:" + e.getMessage());
         }
     }
 

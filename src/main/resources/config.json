@@ -3,8 +3,10 @@
   "port_old": 8082,
   "port": 3101,
   "telegram_res": "http://bot1.unionchc.com",
-  "server": "https://node1.unionchc.com",
+  "server_old": "https://node1.unionchc.com",
+  "socket_file": "/home/bka/.ethereum/rinkeby/geth.ipc",
   "sqlite": {
-    "path": "/home/bka/work/kuku/bots/unionchc/database/unionchc.db"
+    "path_old": "/home/bka/work/kuku/bots/unionchc/database/unionchc.db",
+    "path": "/home/bka/work/kuku/bots/unionchc/database/rinkeby.db"
   }
 }
