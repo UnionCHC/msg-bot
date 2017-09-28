@@ -9,6 +9,8 @@ import com.desprice.unionchc.sqlite.SQLite;
 import com.desprice.unionchc.telegram.BotTelegram;
 import org.apache.commons.daemon.Daemon;
 import org.apache.commons.daemon.DaemonContext;
+import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
+import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.jackson.JacksonFeature;
@@ -55,6 +57,10 @@ public class Service implements Daemon {
                     .port(config.port)
                     .build();
             mServer = GrizzlyHttpServerFactory.createHttpServer(uri, resourceConfig, false);
+
+            HttpHandler httpHandler = new CLStaticHttpHandler(HttpServer.class.getClassLoader(), "/web/", "/html/");
+            mServer.getServerConfiguration().addHttpHandler(httpHandler, "/res");
+
             System.out.println(uri.toString());
 
 

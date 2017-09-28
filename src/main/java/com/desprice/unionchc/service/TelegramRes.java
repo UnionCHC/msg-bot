@@ -46,7 +46,7 @@ public class TelegramRes {
     @Path("password/{user:\\d+}/{msg:\\d+}")
     @Produces(MediaType.TEXT_HTML)
     public Response getPassword(@PathParam("user") String userName, @PathParam("msg") String msg) {
-        String html = getResourceFile("html/password.html");
+        String html = getResourceFile("web/html/password.html");
         return Response.ok(html).build();
     }
 
@@ -54,7 +54,7 @@ public class TelegramRes {
     @Path("address/{user:\\d+}/{msg:\\d+}")
     @Produces(MediaType.TEXT_HTML)
     public Response getAddress(@PathParam("user") String userName, @PathParam("msg") String msg) {
-        String html = getResourceFile("html/address.html");
+        String html = getResourceFile("web/html/address.html");
         Response response = Response.ok(html).build();
         return response;
     }
@@ -66,9 +66,9 @@ public class TelegramRes {
         String html;
         UserStep step = TStep.getInstance().getStep(userId, Constants.BOT_TELEGRAM);
         if (step.step != Constants.STEP_CONTRACT2)
-            html = getResourceFile("html/contract2no.html");
+            html = getResourceFile("web/html/contract2no.html");
         else
-            html = getResourceFile("html/contract2.html");
+            html = getResourceFile("web/html/contract2.html");
         Response response = Response.ok(html).build();
         return response;
     }

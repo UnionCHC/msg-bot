@@ -250,7 +250,7 @@ public class BotTelegram extends TelegramLongPollingBot {
                     "\n\n  <a href=\" " + path + "\"> Новый</a>" +
                     "" + path;
             sendMessage.setText(text);
-            sendMessage.setParseMode("html");
+            sendMessage.setParseMode("web/html");
 
 
             InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
@@ -505,7 +505,7 @@ public class BotTelegram extends TelegramLongPollingBot {
                     "\n\n  <a href=\" " + path + "\"> Контракт</a>" +
                     "" + path;
             sendMessage.setText(text);
-            sendMessage.setParseMode("html");
+            sendMessage.setParseMode("web/html");
             TStep.getInstance().updateStep(userStep, Constants.STEP_CONTRACT2);
 
             InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
