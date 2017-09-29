@@ -497,7 +497,7 @@ public class BotTelegram extends TelegramLongPollingBot {
         if (userTo.userId > 0) {
             try {
                 LOGGER.debug("sendInfoToAddress address:" + address);
-                LOGGER.debug("sendInfoToAddress user:" + userTo.userId + userTo.firstName);
+                LOGGER.debug("sendInfoToAddress user:" + userTo.userId + " : " + userTo.firstName);
                 SendMessage sendMessage = new SendMessage();
                 sendMessage.enableMarkdown(true);
                 sendMessage.setChatId(userBot.userId.toString());
