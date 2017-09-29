@@ -500,7 +500,7 @@ public class BotTelegram extends TelegramLongPollingBot {
                 LOGGER.debug("sendInfoToAddress user:" + userTo.userId + " : " + userTo.firstName);
                 SendMessage sendMessage = new SendMessage();
                 sendMessage.enableMarkdown(true);
-                sendMessage.setChatId(userBot.userId.toString());
+                sendMessage.setChatId(userTo.userId.toString());
                 sendMessage.setText("Значение: " + value);
                 execute(sendMessage);
             } catch (TelegramApiException ex) {
