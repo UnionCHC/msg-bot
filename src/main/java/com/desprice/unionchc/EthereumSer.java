@@ -36,7 +36,7 @@ public class EthereumSer {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(EthereumSer.class);
 
-    private static final BigInteger GAS_PRICE = BigInteger.valueOf(20_000_000_000L);
+    public static final BigInteger GAS_PRICE = BigInteger.valueOf(20_000_000_000L);
 
     private static final BigInteger GAS_LIMIT = BigInteger.valueOf(1_500_000L);
 
@@ -163,8 +163,17 @@ public class EthereumSer {
         return null;
     }
 
+    private boolean checkBalance(String address) {
+        BigInteger balance = getBalance(address);
+        if (balance.compareTo(GAS_PRICE) < 1)
+            return false;
+        else
+            return true;
+    }
+
     public void sendMoney(String from, String to, String value, String password) {
         try {
+            LOGGER.debug("sendMoney: " + value + " to:" + to);
             EthGetTransactionCount transactionCount = mWeb3.ethGetTransactionCount(from,
                     DefaultBlockParameterName.LATEST).send();
             BigInteger amount = Convert.toWei(value, Convert.Unit.ETHER).toBigInteger();
@@ -183,6 +192,8 @@ public class EthereumSer {
 
     public String sendContract(String address, String contractAdr, String functionName, String password) {
         LOGGER.debug("sendContract " + functionName + " : " + address + " " + contractAdr);
+        if (!checkBalance(address))
+            return "Недостаточно средств для перевода ";
         try {
             BigInteger nonce = mWeb3.ethGetTransactionCount(address, DefaultBlockParameterName.LATEST)
                     //BigInteger nonce = mWeb3.ethGetTransactionCount(address, DefaultBlockParameterName.PENDING)
@@ -212,7 +223,6 @@ public class EthereumSer {
         }
         return "";
     }
-
 
     public BigInteger getValueEvent(String address, String contractAdr, int value) {
         LOGGER.debug("getValueEvent " + " : " + address + " " + contractAdr);
@@ -257,14 +267,14 @@ public class EthereumSer {
                 for (MyEvents.Value1EventEventResponse event : items1) {
                     LOGGER.debug("from: " + event._from);
                     LOGGER.debug("value: " + event._value.getValue());
-                    BotTelegram.getInstance().sendInfoToAddress(event._from.toString(), event._value.getValue().toString());
+                    BotTelegram.getInstance().sendInfoToAddress(event._from.toString(), "1: " + event._value.getValue().toString());
                 }
 
                 List<MyEvents.Value2EventEventResponse> items2 = events.getValue2EventEvents(receipt);
                 for (MyEvents.Value2EventEventResponse event : items2) {
                     LOGGER.debug("from: " + event._from);
                     LOGGER.debug("value: " + event._value.getValue());
-                    BotTelegram.getInstance().sendInfoToAddress(event._from.toString(), event._value.getValue().toString());
+                    BotTelegram.getInstance().sendInfoToAddress(event._from.toString(), "2: " + event._value.getValue().toString());
                 }
 
             } catch (IOException ex) {

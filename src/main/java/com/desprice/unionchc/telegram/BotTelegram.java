@@ -458,8 +458,10 @@ public class BotTelegram extends TelegramLongPollingBot {
 
     private void callContract(Update update, String functionName) {
         String result = EthereumSer.getInstance().sendContract(userBot.address, Constants.BOT_CONTRACT, functionName, userBot.password);
-        // sendMsg(update.getMessage(), result, true);
-        sendMsg(update.getMessage(), "Контракт отправлен", false);
+        if (null == result || result.isEmpty())
+            sendMsg(update.getMessage(), "Контракт отправлен", false);
+        else
+            sendMsg(update.getMessage(), "" + result, false);
     }
 
     private void callContractGet(Update update, int value) {
@@ -484,7 +486,6 @@ public class BotTelegram extends TelegramLongPollingBot {
             }
         }
     }
-
 
     private void contact2start(Update update) {
         Message messageIn = update.getMessage();

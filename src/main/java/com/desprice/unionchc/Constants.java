@@ -10,7 +10,8 @@ public class Constants {
 
     public static final String BOT_TOKEN = "422355508:AAHDUwyIHfY7i1k6-takBWyHwhzd8tbYxqA";
     public static final String BOT_NAME = "UnionchcBot";
-    public static final String INIT_MONEY = "0.001";
+
+    public static final String INIT_MONEY = "0.5";
 
     public static final String BOT_ACCOUNT_old[] = {"q76ZHrGn", "0xfc17f9ae4e8dc330a240276c811524482c12291d"};
     public static final String BOT_ACCOUNT[] = {"q76ZHrGn1", "0xFA05a5a77339096e83FfCd1ec8e82f0D7CC0a348"};
