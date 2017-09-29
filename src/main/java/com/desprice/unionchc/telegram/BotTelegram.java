@@ -502,11 +502,10 @@ public class BotTelegram extends TelegramLongPollingBot {
                     "/" + messageIn.getMessageId();
             System.out.println(path);
 
-            String text = "Подтвердите контракт" +
-                    "\n\n  <a href=\" " + path + "\"> Контракт</a>" +
-                    "" + path;
+            String text = "Подтвердите контракт";
+            // text += "\n\n  <a href=\" " + path + "\"> Контракт</a>" + path;
+            // sendMessage.setParseMode("HTML");
             sendMessage.setText(text);
-            sendMessage.setParseMode("web/html");
             TStep.getInstance().updateStep(userStep, Constants.STEP_CONTRACT2);
 
             InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
