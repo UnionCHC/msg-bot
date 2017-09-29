@@ -110,7 +110,7 @@ public class EthereumSer {
     public boolean checkUnlock(String address, String password) {
         try {
             PersonalUnlockAccount unlockAccount = mParity.personalUnlockAccount(address, password).send();
-            if (null == unlockAccount) {
+            if (null != unlockAccount.getError()) {
                 LOGGER.debug(unlockAccount.getError().getMessage());
             } else {
                 LOGGER.debug("unlock result: " + unlockAccount.accountUnlocked());
