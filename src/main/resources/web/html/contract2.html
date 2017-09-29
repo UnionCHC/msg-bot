@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Подтверждение контракта 2</title>
 
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1//themes/base/jquery-ui.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
     <script>
+
         var dialogSend;
         $(function () {
             dialogSend = $("#sendingDiv").dialog({
@@ -36,7 +39,6 @@
             });
 
         function sendPassword() {
-            // $('#butSend').prop("disabled", true);
             $.ajax({
                 type: 'POST',
                 contentType: 'application/json; charset=UTF-8',
@@ -71,17 +73,21 @@
 
     </script>
 </head>
-
 <body>
+<div class="container">
+    <H2>Подтверждение контракта 2 </H2>
+    <H3>Укажите пароль для завершения операции </H3>
+    <form>
+        <input hidden type="text" name="path" id="path"/>
+        <div class="form-group">
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" value=""></br></br>
+        </div>
 
-<H2>Подтверждение контракта 2 </H2>
-<H3>Укажите пароль для завершения операции </H3>
-<input hidden type="text" name="path" id="path"/>
-Пароль: <input type="password" id="password" value=""></br></br>
-
-</br>
-<div><span id="info"> </span></div>
-<button id="butSend" onclick=sendPassword()>Отправить</button>
+    </form>
+    <div><span id="info"> </span></div>
+    <button id="butSend" onclick=sendPassword()>Отправить</button>
+</div>
 
 <div id="sendingDiv" style="display:none"><p style="text-align:center"> Отправка данных <BR>
     <img src="/res/image/spinner.gif" width="50" height="50"></p>
