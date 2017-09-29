@@ -223,25 +223,33 @@ public class BotTelegram extends TelegramLongPollingBot {
 
     private void sendMsgCreate() {
         try {
-            EditMessageText editMessage = new EditMessageText();
-            editMessage.setChatId(userBot.userId.toString());
-            editMessage.setMessageId(userBot.messageId.intValue());
             if (null != userBot.address && !userBot.address.isEmpty()) {
-                editMessage.setText("Ваш адрес\n" + userBot.address);
-                execute(editMessage);
-
+                EditMessageText editMessage = new EditMessageText();
+                try {
+                    editMessage.setChatId(userBot.userId.toString());
+                    editMessage.setMessageId(userBot.messageId.intValue());
+                    editMessage.setText("Ваш адрес\n" + userBot.address);
+                    execute(editMessage);
+                } catch (Exception ex) {
+                    logException(ex);
+                    LOGGER.debug(jsonToString(userBot));
+                }
                 SendMessage sendMessage = new SendMessage();
                 sendMessage.enableMarkdown(true);
                 sendMessage.setChatId(userBot.userId.toString());
                 sendMessage.setReplyMarkup(getMenuKeyboard());
                 sendMessage.setText("Вам доступны команды");
                 execute(sendMessage);
+            } else {
+                SendMessage sendMessage = new SendMessage();
+                sendMessage.setChatId(userBot.userId.toString());
+                sendMessage.setText("Произошла ошибка, повторите операцию");
+                execute(sendMessage);
             }
         } catch (TelegramApiException ex) {
             logException(ex);
         }
     }
-
 
     private void getStart(Update update) {
         Message messageIn = update.getMessage();
