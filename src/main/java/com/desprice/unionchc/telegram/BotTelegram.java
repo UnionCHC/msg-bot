@@ -466,9 +466,9 @@ public class BotTelegram extends TelegramLongPollingBot {
     private void callContractGet(Update update, int value) {
         BigInteger result = EthereumSer.getInstance().getValueEvent(userBot.address, Constants.BOT_CONTRACT, value);
         if (null != result)
-            sendMsg(update.getMessage(), "Значение: " + result.toString(), false);
+            sendMsg(update.getMessage(), "Значение для " + value + " : " + result.toString(), false);
         else
-            sendMsg(update.getMessage(), "Значение нет: ", false);
+            sendMsg(update.getMessage(), "Значение для " + value + " нет ", false);
     }
 
     public void sendInfoToAddress(String address, String value) {

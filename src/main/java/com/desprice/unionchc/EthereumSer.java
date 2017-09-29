@@ -63,16 +63,16 @@ public class EthereumSer {
                 if (null != serverUrl) {
                     mWeb3 = Web3j.build(new UnixIpcService(serverUrl));
                     mParity = Parity.build(new UnixIpcService(serverUrl));
-                    System.out.println("UnixIpcService: " + serverUrl);
+                    LOGGER.debug("UnixIpcService: " + serverUrl);
                 } else
                     throw new ExceptionConfig("Not configure server path ");
             } else {
                 mWeb3 = Web3j.build(new HttpService(serverUrl));
                 mParity = Parity.build(new HttpService(serverUrl));
-                System.out.println("HttpService: " + serverUrl);
+                LOGGER.debug("HttpService: " + serverUrl);
             }
             String version = mWeb3.web3ClientVersion().send().getWeb3ClientVersion();
-            System.out.println("version Web3 : " + version);
+            LOGGER.debug("version Web3 : " + version);
 
         } catch (IOException | ExceptionConfig ex) {
             logException(ex);
@@ -85,9 +85,9 @@ public class EthereumSer {
             if (null != serverUrl) {
                 File pipe = new File(serverUrl);
                 if (pipe.exists())
-                    System.out.println("exists");
+                    LOGGER.debug("exists");
                 else
-                    System.out.println(" no exists");
+                    LOGGER.debug(" no exists");
             }
         } catch (Exception ex) {
             logException(ex);
@@ -110,8 +110,12 @@ public class EthereumSer {
     public boolean checkUnlock(String address, String password) {
         try {
             PersonalUnlockAccount unlockAccount = mParity.personalUnlockAccount(address, password).send();
-            System.out.println("unlock result: " + unlockAccount.accountUnlocked());
-            return unlockAccount.accountUnlocked();
+            if (null == unlockAccount) {
+                LOGGER.debug(unlockAccount.getError().getMessage());
+            } else {
+                LOGGER.debug("unlock result: " + unlockAccount.accountUnlocked());
+                return unlockAccount.accountUnlocked();
+            }
         } catch (IOException ex) {
             logException(ex);
         }
@@ -122,7 +126,7 @@ public class EthereumSer {
     public String createAccount(String password) {
         try {
             NewAccountIdentifier identifier = mParity.personalNewAccount(password).send();
-            System.out.println("account id: " + identifier.getAccountId());
+            LOGGER.debug("account id: " + identifier.getAccountId());
             return identifier.getAccountId();
         } catch (IOException ex) {
             logException(ex);
@@ -139,7 +143,7 @@ public class EthereumSer {
         try {
             checkConnect();
             BigInteger balance = mWeb3.ethGetBalance(address, DefaultBlockParameterName.LATEST).send().getBalance();
-            System.out.println("balance: " + Convert.fromWei(new BigDecimal(balance), Convert.Unit.ETHER));
+            LOGGER.debug("balance: " + Convert.fromWei(new BigDecimal(balance), Convert.Unit.ETHER));
             return balance;
         } catch (IOException ex) {
             checkConnect();
@@ -151,7 +155,7 @@ public class EthereumSer {
     public BigInteger getGasPrice() {
         try {
             BigInteger ethGasPrice = mWeb3.ethGasPrice().send().getGasPrice();
-            System.out.println("ethGasPrice: " + ethGasPrice);
+            LOGGER.debug("ethGasPrice: " + ethGasPrice);
             return ethGasPrice;
         } catch (IOException ex) {
             logException(ex);
@@ -165,12 +169,12 @@ public class EthereumSer {
                     DefaultBlockParameterName.LATEST).send();
             BigInteger amount = Convert.toWei(value, Convert.Unit.ETHER).toBigInteger();
             BigInteger nonce = transactionCount.getTransactionCount();
-            System.out.println("nonce: " + nonce);
+            LOGGER.debug("nonce: " + nonce);
 
             Transaction transaction = Transaction.createEtherTransaction(from, nonce, GAS_PRICE, GAS_LIMIT, to, amount);
             EthSendTransaction sendTransaction = mParity.personalSignAndSendTransaction(transaction, password).send();
 
-            System.out.println("Transaction hash: " + sendTransaction.getTransactionHash());
+            LOGGER.debug("Transaction hash: " + sendTransaction.getTransactionHash());
         } catch (IOException ex) {
             logException(ex);
         }
@@ -184,7 +188,7 @@ public class EthereumSer {
                     //BigInteger nonce = mWeb3.ethGetTransactionCount(address, DefaultBlockParameterName.PENDING)
                     .send().getTransactionCount();
 
-            System.out.println("nonceNew: " + nonce);
+            LOGGER.debug("nonceNew: " + nonce);
 
             Function function = new Function(functionName, Collections.emptyList(), Collections.emptyList());
             String encodedFunction = FunctionEncoder.encode(function);
@@ -194,12 +198,12 @@ public class EthereumSer {
             mParity.personalSignAndSendTransaction(transaction, password)
                     .observable().subscribe(result -> {
                 // EthSendTransaction result = x;
-                System.out.println("transaction hash: " + result.toString());
+                LOGGER.debug("transaction hash: " + result.toString());
                 if (result.hasError()) {
-                    System.out.println("error: " + result.getError().getMessage());
+                    LOGGER.debug("error: " + result.getError().getMessage());
                     BotTelegram.getInstance().sendInfoToAddress(address, "error: " + result.getError().getMessage());
                 } else {
-                    System.out.println("transaction hash: " + result.getTransactionHash());
+                    LOGGER.debug("transaction hash: " + result.getTransactionHash());
                     BotTelegram.getInstance().sendInfoToAddress(address, "transaction hash:\n" + result.getTransactionHash());
                 }
             });
@@ -215,7 +219,7 @@ public class EthereumSer {
         try {
             BigInteger nonce = mWeb3.ethGetTransactionCount(
                     address, DefaultBlockParameterName.LATEST).send().getTransactionCount();
-            System.out.println("nonce: " + nonce);
+            LOGGER.debug("nonce: " + nonce);
 
             ClientTransactionManager transactionManager = new ClientTransactionManager(mWeb3, address);
 
@@ -226,7 +230,7 @@ public class EthereumSer {
             } else {
                 uint256 = events.value2();
             }
-            System.out.println(uint256.get().getValue());
+            LOGGER.debug("getValueEvent = " + uint256.get().getValue());
             return uint256.get().getValue();
         } catch (IOException | ExecutionException | InterruptedException ex) {
             logException(ex);
@@ -236,7 +240,7 @@ public class EthereumSer {
 
     private Subscription subscribeTransactions(String address, String contractAdr) {
         return mWeb3.transactionObservable().subscribe(tx -> {
-            System.out.println("+++ catch new transaction: " + tx.getHash());
+            LOGGER.debug("+++ catch new transaction: " + tx.getHash());
             try {
                 TransactionReceipt receipt = mWeb3.ethGetTransactionReceipt(tx.getHash()).send().getResult();
                 ClientTransactionManager transactionManager = new ClientTransactionManager(mWeb3, address);
@@ -244,22 +248,22 @@ public class EthereumSer {
                 MyEvents events = MyEvents.load(contractAdr, mWeb3, transactionManager, GAS_PRICE, GAS_LIMIT);
                 List<MyEvents.MyEventEventResponse> items = events.getMyEventEvents(receipt);
                 for (MyEvents.MyEventEventResponse event : items) {
-                    System.out.println("from: " + event._from);
-                    System.out.println("value: " + event._value.getValue());
+                    LOGGER.debug("from: " + event._from);
+                    LOGGER.debug("value: " + event._value.getValue());
                     BotTelegram.getInstance().sendInfoToAddress(event._from.toString(), event._value.getValue().toString());
                 }
 
                 List<MyEvents.Value1EventEventResponse> items1 = events.getValue1EventEvents(receipt);
                 for (MyEvents.Value1EventEventResponse event : items1) {
-                    System.out.println("from: " + event._from);
-                    System.out.println("value: " + event._value.getValue());
+                    LOGGER.debug("from: " + event._from);
+                    LOGGER.debug("value: " + event._value.getValue());
                     BotTelegram.getInstance().sendInfoToAddress(event._from.toString(), event._value.getValue().toString());
                 }
 
                 List<MyEvents.Value2EventEventResponse> items2 = events.getValue2EventEvents(receipt);
                 for (MyEvents.Value2EventEventResponse event : items2) {
-                    System.out.println("from: " + event._from);
-                    System.out.println("value: " + event._value.getValue());
+                    LOGGER.debug("from: " + event._from);
+                    LOGGER.debug("value: " + event._value.getValue());
                     BotTelegram.getInstance().sendInfoToAddress(event._from.toString(), event._value.getValue().toString());
                 }
 
@@ -275,9 +279,9 @@ public class EthereumSer {
         return events.myEventEventObservable(
                 DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
                 .subscribe(myEventEventResponse -> {
-                    System.out.println("+++ event +++");
-                    System.out.print("from: " + myEventEventResponse._from);
-                    System.out.print("value: " + myEventEventResponse._value);
+                    LOGGER.debug("+++ event +++");
+                    LOGGER.debug("from: " + myEventEventResponse._from);
+                    LOGGER.debug("value: " + myEventEventResponse._value);
                 });
     }
 
