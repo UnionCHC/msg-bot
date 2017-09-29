@@ -36,7 +36,7 @@ public class EthereumSer {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(EthereumSer.class);
 
-    public static final BigInteger GAS_PRICE = BigInteger.valueOf(20_000_000_000L);
+    private static final BigInteger GAS_PRICE = BigInteger.valueOf(20_000_000_000L);
 
     private static final BigInteger GAS_LIMIT = BigInteger.valueOf(1_500_000L);
 
@@ -165,10 +165,7 @@ public class EthereumSer {
 
     private boolean checkBalance(String address) {
         BigInteger balance = getBalance(address);
-        if (balance.compareTo(GAS_PRICE) < 1)
-            return false;
-        else
-            return true;
+        return balance.compareTo(GAS_PRICE) >= 1;
     }
 
     public void sendMoney(String from, String to, String value, String password) {
@@ -250,7 +247,7 @@ public class EthereumSer {
 
     private Subscription subscribeTransactions(String address, String contractAdr) {
         return mWeb3.transactionObservable().subscribe(tx -> {
-            LOGGER.debug("+++ catch new transaction: " + tx.getHash());
+            //LOGGER.debug("+++ catch new transaction: " + tx.getHash());
             try {
                 TransactionReceipt receipt = mWeb3.ethGetTransactionReceipt(tx.getHash()).send().getResult();
                 ClientTransactionManager transactionManager = new ClientTransactionManager(mWeb3, address);

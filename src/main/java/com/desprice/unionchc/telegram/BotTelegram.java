@@ -139,34 +139,47 @@ public class BotTelegram extends TelegramLongPollingBot {
 
             String menuText = message.getText();
 
-            if (null != message && message.hasText()) {
-                if (menuText.equals("/start") || menuText.equals(CALL_ENTER))
-                    getStart(update);
-                else if (menuText.equals(CALL_EXIT))
-                    callExit(update);
-                else if (menuText.equals(CALL_BALANCE))
-                    getBalance(update);
-                else if (menuText.equals(CALL_INFO))
-                    getInfo(update);
-                else if (menuText.equals(CALL_CONTRACT))
-                    callContract(update, "sendEvent");
-                else if (menuText.equals(CALL_INC1))
-                    callContract(update, "incValue1");
-                else if (menuText.equals(CALL_INC2))
-                    //callContract(update, "incValue2");
-                    contact2start(update);
-                else if (menuText.equals(CALL_GET1))
-                    callContractGet(update, 1);
-                else if (menuText.equals(CALL_GET2))
-                    callContractGet(update, 2);
-
-                else if (menuText.equals("*"))
-                    hideButton(message);
-                else
-                    sendMsg(message, "Я не знаю что ответить на это\n" +
-                            " Доступны команды:\n" +
-                            "/start\n" +
-                            "", false);
+            if (message.hasText()) { // null != message &&
+                switch (menuText) {
+                    case "/start":
+                    case CALL_ENTER:
+                        getStart(update);
+                        break;
+                    case CALL_EXIT:
+                        callExit(update);
+                        break;
+                    case CALL_BALANCE:
+                        getBalance(update);
+                        break;
+                    case CALL_INFO:
+                        getInfo(update);
+                        break;
+                    case CALL_CONTRACT:
+                        callContract(update, "sendEvent");
+                        break;
+                    case CALL_INC1:
+                        callContract(update, "incValue1");
+                        break;
+                    case CALL_INC2:
+                        //callContract(update, "incValue2");
+                        contact2start(update);
+                        break;
+                    case CALL_GET1:
+                        callContractGet(update, 1);
+                        break;
+                    case CALL_GET2:
+                        callContractGet(update, 2);
+                        break;
+                    case "*":
+                        hideButton(message);
+                        break;
+                    default:
+                        sendMsg(message, "Я не знаю что ответить на это\n" +
+                                " Доступны команды:\n" +
+                                "/start\n" +
+                                "", false);
+                        break;
+                }
             }
         } else if (update.hasCallbackQuery()) {
             CallbackQuery query = update.getCallbackQuery();
@@ -201,7 +214,6 @@ public class BotTelegram extends TelegramLongPollingBot {
     private void sendMsg(Message message, String text, boolean isReplay) {
         SendMessage sendMessage = initMessage(message, isReplay);
         sendMessage.setText(text);
-
         try {
             execute(sendMessage);
         } catch (TelegramApiException ex) {
@@ -476,6 +488,8 @@ public class BotTelegram extends TelegramLongPollingBot {
         UserBot userTo = TUsers.getInstance().getUserFromAddress(address);
         if (userTo.userId > 0) {
             try {
+                LOGGER.debug("sendInfoToAddress address:" + address);
+                LOGGER.debug("sendInfoToAddress user:" + userTo.userId + userTo.firstName);
                 SendMessage sendMessage = new SendMessage();
                 sendMessage.enableMarkdown(true);
                 sendMessage.setChatId(userBot.userId.toString());
@@ -484,6 +498,8 @@ public class BotTelegram extends TelegramLongPollingBot {
             } catch (TelegramApiException ex) {
                 logException(ex);
             }
+        } else {
+            LOGGER.debug("sendInfoToAddress userTo.userId unknow");
         }
     }
 
