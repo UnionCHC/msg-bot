@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static com.desprice.unionchc.Utils.logException;
+
 public class Options {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Options.class);
@@ -21,8 +23,9 @@ public class Options {
         ObjectMapper mapper = new ObjectMapper();
         try {
             mConfig = mapper.readValue(is, Config.class);
-        } catch (IOException e) {
-            LOGGER.error("Error config file:" + e.getMessage());
+        } catch (IOException ex) {
+            LOGGER.error("Error config file:" + ex.getMessage());
+            logException(ex);
         }
     }
 

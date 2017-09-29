@@ -7,6 +7,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import static com.desprice.unionchc.Utils.logException;
+
 public class TStep {
 
 
@@ -60,8 +62,8 @@ public class TStep {
             ps.setLong(4, step.value);
             int numRowsInserted = ps.executeUpdate();
             System.out.println("updateStep numRowsInserted:" + numRowsInserted);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+        } catch (SQLException ex) {
+            logException(ex);
         }
     }
 
@@ -83,8 +85,8 @@ public class TStep {
                 System.out.println("getStep: " + userStep.step);
             }
 
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+        } catch (SQLException ex) {
+            logException(ex);
         }
         return userStep;
 

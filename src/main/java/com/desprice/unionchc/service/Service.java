@@ -25,8 +25,7 @@ import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
 
-import static com.desprice.unionchc.Utils.stackTrace;
-
+import static com.desprice.unionchc.Utils.logException;
 
 public class Service implements Daemon {
     private final static Logger LOGGER = LoggerFactory.getLogger(Service.class);
@@ -75,10 +74,9 @@ public class Service implements Daemon {
 
 
         } catch (IOException ex) {
-            LOGGER.error(ex.getMessage());
+            logException(ex);
         } catch (Exception ex) {
-            LOGGER.error(ex.getMessage());
-            LOGGER.error(stackTrace(ex));
+            logException(ex);
         }
 
     }

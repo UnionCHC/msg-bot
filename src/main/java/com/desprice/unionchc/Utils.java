@@ -13,11 +13,14 @@ public class Utils {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
 
+    private static final String MSG_LOG_LINE = "-------------------------------------------";
+    private static final String MSG_LOG_EXCEPTION = "Exception: ";
+
     public static String jsonToString(Object object) {
         try {
             return MAPPER.writeValueAsString(object);
-        } catch (JsonProcessingException e) {
-            LOGGER.error(e.getMessage());
+        } catch (JsonProcessingException ex) {
+            logException(ex);
         }
 
         return "";
@@ -31,6 +34,19 @@ public class Utils {
         exception.printStackTrace(pw);
         pw.flush();
         return sw.toString();
+    }
+
+
+    public static void logException(Exception ex) {
+        String message = "";
+        if (null != ex && null != ex.getMessage()) {
+            message = ex.getMessage();
+        }
+        String stack = stackTrace(ex);
+        LOGGER.error(MSG_LOG_LINE);
+        LOGGER.error(MSG_LOG_EXCEPTION + message);
+        LOGGER.error(stack);
+        LOGGER.error(MSG_LOG_LINE);
     }
 
 

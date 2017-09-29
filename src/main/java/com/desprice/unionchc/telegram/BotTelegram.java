@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.desprice.unionchc.Constants.*;
+import static com.desprice.unionchc.Utils.logException;
 
 public class BotTelegram extends TelegramLongPollingBot {
 
@@ -95,8 +96,8 @@ public class BotTelegram extends TelegramLongPollingBot {
         try {
             ourInstance = new BotTelegram();
             telegramBotsApi.registerBot(ourInstance);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+        } catch (TelegramApiException ex) {
+            logException(ex);
         }
     }
 
@@ -138,7 +139,7 @@ public class BotTelegram extends TelegramLongPollingBot {
 
             String menuText = message.getText();
 
-            if (message != null && message.hasText()) {
+            if (null != message && message.hasText()) {
                 if (menuText.equals("/start") || menuText.equals(CALL_ENTER))
                     getStart(update);
                 else if (menuText.equals(CALL_EXIT))
@@ -203,8 +204,8 @@ public class BotTelegram extends TelegramLongPollingBot {
 
         try {
             execute(sendMessage);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+        } catch (TelegramApiException ex) {
+            logException(ex);
         }
     }
 
@@ -224,8 +225,8 @@ public class BotTelegram extends TelegramLongPollingBot {
                 sendMessage.setText("Вам доступны команды");
                 execute(sendMessage);
             }
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+        } catch (TelegramApiException ex) {
+            logException(ex);
         }
     }
 
@@ -281,8 +282,8 @@ public class BotTelegram extends TelegramLongPollingBot {
             System.out.println(sendOk.getMessageId());
             userBot.messageId = sendOk.getMessageId().longValue();
             TUsers.getInstance().setMessage(userBot);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+        } catch (TelegramApiException ex) {
+            logException(ex);
         }
     }
 
@@ -341,8 +342,8 @@ public class BotTelegram extends TelegramLongPollingBot {
                     */
                     break;
             }
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+        } catch (TelegramApiException ex) {
+            logException(ex);
         }
     }
 
@@ -371,7 +372,7 @@ public class BotTelegram extends TelegramLongPollingBot {
                 result = true;
         } catch (Exception ex) {
             result = false;
-            LOGGER.debug(ex.getMessage());
+            logException(ex);
         }
         if (result)
             sendMsgCreate();
@@ -397,8 +398,8 @@ public class BotTelegram extends TelegramLongPollingBot {
             userStep.step = Constants.STEP_PASSWORD;
             TStep.getInstance().updateStep(userStep);
 
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+        } catch (TelegramApiException ex) {
+            logException(ex);
         }
     }
 
@@ -412,8 +413,8 @@ public class BotTelegram extends TelegramLongPollingBot {
                 sendMessage.setText("Вы вышли из системы");
                 sendMessage.setReplyMarkup(getMenuStart());
                 execute(sendMessage);
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
+            } catch (TelegramApiException ex) {
+                logException(ex);
             }
         }
     }
@@ -430,8 +431,8 @@ public class BotTelegram extends TelegramLongPollingBot {
             sendMessage.setText(userBot.address);
             execute(sendMessage);
 
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+        } catch (TelegramApiException ex) {
+            logException(ex);
         }
     }
 
@@ -450,8 +451,8 @@ public class BotTelegram extends TelegramLongPollingBot {
             else
                 sendMessage.setText("Ваш баланс: 0");
             execute(sendMessage);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+        } catch (TelegramApiException ex) {
+            logException(ex);
         }
     }
 
@@ -479,8 +480,8 @@ public class BotTelegram extends TelegramLongPollingBot {
                 sendMessage.setChatId(userBot.userId.toString());
                 sendMessage.setText("Значение: " + value);
                 execute(sendMessage);
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
+            } catch (TelegramApiException ex) {
+                logException(ex);
             }
         }
     }
@@ -530,8 +531,8 @@ public class BotTelegram extends TelegramLongPollingBot {
             System.out.println(sendOk.getMessageId());
             userBot.messageId = sendOk.getMessageId().longValue();
             TUsers.getInstance().setMessage(userBot);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+        } catch (TelegramApiException ex) {
+            logException(ex);
         }
     }
 
@@ -548,8 +549,8 @@ public class BotTelegram extends TelegramLongPollingBot {
             execute(sendMessageEdit);
             String result = EthereumSer.getInstance().sendContract(userBot.address, Constants.BOT_CONTRACT, "incValue2", userBot.password);
             TStep.getInstance().updateStep(userStep, Constants.STEP_NONE);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+        } catch (TelegramApiException ex) {
+            logException(ex);
             return false;
         }
         return true;
@@ -565,8 +566,8 @@ public class BotTelegram extends TelegramLongPollingBot {
             sendMessageEdit.setText("Отмена");
             execute(sendMessageEdit);
             TStep.getInstance().updateStep(userStep, Constants.STEP_NONE);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+        } catch (TelegramApiException ex) {
+            logException(ex);
         }
     }
 
@@ -576,8 +577,8 @@ public class BotTelegram extends TelegramLongPollingBot {
         sendMessage.setReplyMarkup(hideKeyboard());
         try {
             execute(sendMessage);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+        } catch (TelegramApiException ex) {
+            logException(ex);
         }
     }
 

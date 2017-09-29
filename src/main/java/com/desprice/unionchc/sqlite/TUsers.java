@@ -7,6 +7,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import static com.desprice.unionchc.Utils.logException;
+
 public class TUsers {
 
 
@@ -53,8 +55,8 @@ public class TUsers {
             } else {
                 addUser(user);
             }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+        } catch (SQLException ex) {
+            logException(ex);
         }
 
 
@@ -77,8 +79,8 @@ public class TUsers {
             ps.setString(5, user.userName);
             int numRowsInserted = ps.executeUpdate();
             System.out.println("numRowsInserted:" + numRowsInserted);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+        } catch (SQLException ex) {
+            logException(ex);
         }
 
     }
@@ -93,8 +95,8 @@ public class TUsers {
             if (rs.next()) {
                 userFromDb(userBot, rs);
             }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+        } catch (SQLException ex) {
+            logException(ex);
         }
         return userBot;
     }
@@ -109,8 +111,8 @@ public class TUsers {
             if (rs.next()) {
                 userFromDb(userBot, rs);
             }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+        } catch (SQLException ex) {
+            logException(ex);
         }
         return userBot;
     }
@@ -139,8 +141,8 @@ public class TUsers {
             ps.setLong(2, user.userId);
             int numRowsUpdate = ps.executeUpdate();
             System.out.println("updateWallet:" + numRowsUpdate);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+        } catch (SQLException ex) {
+            logException(ex);
         }
     }
 
@@ -154,8 +156,8 @@ public class TUsers {
             ps.setLong(2, user.userId);
             int numRowsUpdate = ps.executeUpdate();
             System.out.println("updateAddress:" + numRowsUpdate);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+        } catch (SQLException ex) {
+            logException(ex);
         }
     }
 
@@ -169,8 +171,8 @@ public class TUsers {
             ps.setLong(2, user.userId);
             int numRowsUpdate = ps.executeUpdate();
             System.out.println("updatePassword:" + numRowsUpdate);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+        } catch (SQLException ex) {
+            logException(ex);
         }
     }
 
@@ -184,8 +186,8 @@ public class TUsers {
             ps.setLong(2, user.userId);
             int numRowsUpdate = ps.executeUpdate();
             System.out.println("updatePassword:" + numRowsUpdate);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+        } catch (SQLException ex) {
+            logException(ex);
         }
     }
 
@@ -204,8 +206,8 @@ public class TUsers {
             ps.setLong(4, user.userId);
             int numRowsUpdate = ps.executeUpdate();
             System.out.println("updateVerify:" + numRowsUpdate);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+        } catch (SQLException ex) {
+            logException(ex);
         }
     }
 
@@ -218,8 +220,8 @@ public class TUsers {
             ps.setLong(1, userId);
             int numRowsUpdate = ps.executeUpdate();
             System.out.println("removeUser:" + numRowsUpdate);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+        } catch (SQLException ex) {
+            logException(ex);
         }
     }
 

@@ -4,6 +4,7 @@
   "port": 3101,
   "telegram_res": "http://bot1.unionchc.com",
   "server": "https://node1.unionchc.com",
+  "server_socket_1": "/home/bka/.ethereum/rinkeby/geth.ipc",
   "sqlite": {
     "path": "/home/unionchc/database/unionchc.db"
   }

@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import static com.desprice.unionchc.Utils.logException;
+
 @Path("telegram")
 public class TelegramRes {
     private static final Logger LOGGER = LoggerFactory.getLogger(TelegramRes.class);
@@ -86,8 +88,8 @@ public class TelegramRes {
                 sb.append(line);
                 sb.append("\n");
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ex) {
+            logException(ex);
         }
         //finally convert StringBuffer object to String!
         return sb.toString();
@@ -126,7 +128,7 @@ public class TelegramRes {
                     messageInfo.setMessage("Вам создан адрес");
                 }
             } catch (Exception ex) {
-                LOGGER.debug(ex.getMessage());
+                logException(ex);
             }
         }
         return Response.status(Response.Status.OK).entity(messageInfo).build();
@@ -165,7 +167,7 @@ public class TelegramRes {
                     }
                 }
             } catch (Exception ex) {
-                LOGGER.debug(ex.getMessage());
+                logException(ex);
             }
         }
         return Response.status(Response.Status.OK).entity(messageInfo).build();
@@ -201,7 +203,7 @@ public class TelegramRes {
                     }
                 }
             } catch (Exception ex) {
-                LOGGER.debug(ex.getMessage());
+                logException(ex);
             }
         }
         return Response.status(Response.Status.OK).entity(messageInfo).build();

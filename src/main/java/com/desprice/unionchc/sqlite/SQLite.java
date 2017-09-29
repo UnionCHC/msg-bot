@@ -5,6 +5,8 @@ import com.desprice.unionchc.Options;
 
 import java.sql.*;
 
+import static com.desprice.unionchc.Utils.logException;
+
 public class SQLite {
 
 
@@ -41,7 +43,7 @@ public class SQLite {
 
             }
         } catch (ClassNotFoundException | SQLException ex) {
-            ex.printStackTrace();
+            logException(ex);
         }
     }
 
@@ -53,8 +55,8 @@ public class SQLite {
     public void closeConnection() {
         try {
             mConnection.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException ex) {
+            logException(ex);
         }
     }
 
@@ -66,7 +68,7 @@ public class SQLite {
     public boolean checkTableExists(String tableName) {
         boolean result = false;
         String sql = "SELECT name FROM sqlite_master WHERE type='table' AND name = ?";
-        PreparedStatement ps = null;
+        PreparedStatement ps;
         try {
             ps = mConnection.prepareStatement(sql);
             ps.setString(1, tableName);
@@ -74,8 +76,8 @@ public class SQLite {
             if (resultSql.next())
                 result = resultSql.isFirst();
             ps.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException ex) {
+            logException(ex);
         }
         return result;
     }
@@ -86,8 +88,8 @@ public class SQLite {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.execute();
             ps.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException ex) {
+            logException(ex);
         }
     }
 
