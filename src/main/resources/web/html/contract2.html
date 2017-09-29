@@ -66,10 +66,11 @@
         }
 
         function CloseWithWindowOpenTrick() {
-            var objWindow = window.open(location.href, "_self");
-            objWindow.close();
+            setTimeout(function () {
+                var objWindow = window.open(location.href, "_self");
+                objWindow.close();
+            }, 800);
         }
-
 
     </script>
 </head>
