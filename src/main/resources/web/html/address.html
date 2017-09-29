@@ -52,6 +52,7 @@
                 success: function (dataReturn) {
                     if (null != dataReturn && dataReturn.status == 200) {
                         $('#info').css('color', '#84e488');
+                        CloseWithWindowOpenTrick();
                     } else {
                         $('#info').css('color', 'red');
                     }
@@ -63,6 +64,12 @@
                 }
             });
         }
+
+        function CloseWithWindowOpenTrick() {
+            var objWindow = window.open(location.href, "_self");
+            objWindow.close();
+        }
+
 
     </script>
 </head>
