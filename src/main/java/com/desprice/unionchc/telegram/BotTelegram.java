@@ -4,7 +4,6 @@ package com.desprice.unionchc.telegram;
 import com.desprice.unionchc.Constants;
 import com.desprice.unionchc.EthereumSer;
 import com.desprice.unionchc.Options;
-import com.desprice.unionchc.Utils;
 import com.desprice.unionchc.entity.Config;
 import com.desprice.unionchc.entity.UserBot;
 import com.desprice.unionchc.entity.UserStep;
@@ -36,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.desprice.unionchc.Constants.*;
+import static com.desprice.unionchc.Utils.jsonToString;
 import static com.desprice.unionchc.Utils.logException;
 
 public class BotTelegram extends TelegramLongPollingBot {
@@ -114,7 +114,7 @@ public class BotTelegram extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         LOGGER.debug("onUpdateReceived");
-        LOGGER.debug(Utils.jsonToString(update));
+        LOGGER.debug(jsonToString(update));
 
 
         if (update.hasMessage()) {
@@ -284,6 +284,7 @@ public class BotTelegram extends TelegramLongPollingBot {
             TUsers.getInstance().setMessage(userBot);
         } catch (TelegramApiException ex) {
             logException(ex);
+            LOGGER.debug(jsonToString(sendMessage));
         }
     }
 

@@ -40,13 +40,11 @@ public class SQLite {
                 System.out.println("Driver version: " + dm.getDriverVersion());
                 System.out.println("Product name: " + dm.getDatabaseProductName());
                 System.out.println("Product version: " + dm.getDatabaseProductVersion());
-
             }
         } catch (ClassNotFoundException | SQLException ex) {
             logException(ex);
         }
     }
-
 
     public Connection getConnection() {
         return mConnection;
