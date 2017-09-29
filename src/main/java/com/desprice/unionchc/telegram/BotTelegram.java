@@ -247,12 +247,11 @@ public class BotTelegram extends TelegramLongPollingBot {
                     "/" + messageIn.getMessageId();
             System.out.println(path);
 
-            String text = "Регистрация в системе \n Ваш выбор" +
-                    "\n\n  <a href=\" " + path + "\"> Новый</a>" +
-                    "" + path;
+            String text = "Регистрация в системе \n Ваш выбор";
+//                    "\n\n  <a href=\" " + path + "\"> Новый</a>" +
+//                    "" + path;
+//            sendMessage.setParseMode("web/html");
             sendMessage.setText(text);
-            sendMessage.setParseMode("web/html");
-
 
             InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
             List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
