@@ -195,8 +195,8 @@ public class EthereumSer {
         if (!checkBalance(address))
             return "Недостаточно средств для перевода ";
         try {
-            BigInteger nonce = mWeb3.ethGetTransactionCount(address, DefaultBlockParameterName.LATEST)
-                    //BigInteger nonce = mWeb3.ethGetTransactionCount(address, DefaultBlockParameterName.PENDING)
+            //BigInteger nonce = mWeb3.ethGetTransactionCount(address, DefaultBlockParameterName.LATEST)
+            BigInteger nonce = mWeb3.ethGetTransactionCount(address, DefaultBlockParameterName.PENDING)
                     .send().getTransactionCount();
 
             LOGGER.debug("nonceNew: " + nonce);
