@@ -14,7 +14,8 @@ public class Config {
     public String server;
     @JsonProperty("server_socket")
     public String serverSocket;
-    @JsonProperty("telegram_res")
-    public String telegramRes;
+
+    public Map<String, String> telegram;
     public Map<String, String> sqlite;
+    public Map<String, String> ethereum;
 }

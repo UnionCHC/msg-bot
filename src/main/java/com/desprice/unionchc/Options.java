@@ -45,4 +45,16 @@ public class Options {
     public Config getConfig() {
         return mConfig;
     }
+
+    public String getContract() {
+        return mConfig.ethereum.get("contract");
+    }
+
+    public String getAddress() {
+        return mConfig.ethereum.get("address");
+    }
+
+    public String getPassword() {
+        return mConfig.ethereum.get("password");
+    }
 }

@@ -9,6 +9,6 @@ gradlew*
 out
 service.pid
 service.sh
-src/main/resources/config.json
-src/main/resources/logback.xml
+/src/main/resources/config.json
+/src/main/resources/logback.xml
 src/test/

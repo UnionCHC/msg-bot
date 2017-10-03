@@ -1,11 +1,19 @@
 {
   "host": "localhost",
-  "port_old": 8082,
   "port": 3101,
-  "telegram_res": "http://bot1.unionchc.com",
-  "server": "https://node1.unionchc.com",
-  "server_socket_1": "/home/bka/.ethereum/rinkeby/geth.ipc",
+  "server": "https://unionchc.com",
+  "server_socket": "/.ethereum/rinkeby/geth.ipc",
+  "telegram": {
+    "site": "http://unionchc.com",
+    "token": "xxxxx:xxxxxxxxxxxxxxxx",
+    "name": "UnionchcBot"
+  },
   "sqlite": {
-    "path": "/home/unionchc/database/unionchc.db"
+    "path": "/database/unionch.db"
+  },
+  "ethereum": {
+    "contract": "0x",
+    "address": "0x",
+    "password": ""
   }
 }

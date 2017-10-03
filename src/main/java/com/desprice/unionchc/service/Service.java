@@ -1,7 +1,6 @@
 package com.desprice.unionchc.service;
 
 
-import com.desprice.unionchc.Constants;
 import com.desprice.unionchc.EthereumSer;
 import com.desprice.unionchc.Options;
 import com.desprice.unionchc.entity.Config;
@@ -70,7 +69,7 @@ public class Service implements Daemon {
             SQLite sqlite = SQLite.getInstance();
             sqlite.checkTables();
             BotTelegram.init();
-            EthereumSer.getInstance().setSubscribe(Constants.BOT_ACCOUNT[1], Constants.BOT_CONTRACT);
+            EthereumSer.getInstance().setSubscribe(Options.getInstance().getAddress(), Options.getInstance().getContract());
 
 
         } catch (IOException ex) {

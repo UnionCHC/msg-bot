@@ -92,9 +92,7 @@ public class EthereumSer {
         } catch (Exception ex) {
             logException(ex);
         }
-
     }
-
 
     public void setSubscribe(String address, String contractAdr) {
         if (mSubscription == null || mSubscription.isUnsubscribed())
@@ -105,7 +103,6 @@ public class EthereumSer {
         if (mSubscription != null && !mSubscription.isUnsubscribed())
             mSubscription.unsubscribe();
     }
-
 
     public boolean checkUnlock(String address, String password) {
         try {
@@ -122,7 +119,6 @@ public class EthereumSer {
         return false;
     }
 
-
     public String createAccount(String password) {
         try {
             NewAccountIdentifier identifier = mParity.personalNewAccount(password).send();
@@ -133,7 +129,6 @@ public class EthereumSer {
         }
         return null;
     }
-
 
     public BigInteger getBalance(String address) {
         if (null == address || address.isEmpty()) {
@@ -186,13 +181,11 @@ public class EthereumSer {
         }
     }
 
-
     public String sendContract(String address, String contractAdr, String functionName, String password) {
         LOGGER.debug("sendContract " + functionName + " : " + address + " " + contractAdr);
         if (!checkBalance(address))
             return "Недостаточно средств для перевода ";
         try {
-            //BigInteger nonce = mWeb3.ethGetTransactionCount(address, DefaultBlockParameterName.LATEST)
             BigInteger nonce = mWeb3.ethGetTransactionCount(address, DefaultBlockParameterName.PENDING)
                     .send().getTransactionCount();
 
@@ -205,7 +198,6 @@ public class EthereumSer {
 
             mParity.personalSignAndSendTransaction(transaction, password)
                     .observable().subscribe(result -> {
-                // EthSendTransaction result = x;
                 LOGGER.debug("transaction hash: " + result.toString());
                 if (result.hasError()) {
                     LOGGER.debug("error: " + result.getError().getMessage());
@@ -247,7 +239,6 @@ public class EthereumSer {
 
     private Subscription subscribeTransactions(String address, String contractAdr) {
         return mWeb3.transactionObservable().subscribe(tx -> {
-            //LOGGER.debug("+++ catch new transaction: " + tx.getHash());
             try {
                 TransactionReceipt receipt = mWeb3.ethGetTransactionReceipt(tx.getHash()).send().getResult();
                 ClientTransactionManager transactionManager = new ClientTransactionManager(mWeb3, address);
