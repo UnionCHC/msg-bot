@@ -1,6 +1,8 @@
 package com.desprice.unionchc.sqlite;
 
 import com.desprice.unionchc.entity.UserBot;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,6 +13,7 @@ import static com.desprice.unionchc.Utils.logException;
 
 public class TUsers {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(TUsers.class);
 
     private static TUsers ourInstance = new TUsers();
 
@@ -34,7 +37,7 @@ public class TUsers {
     }
 
     private void createTableUsers() {
-        System.out.println("create table: " + TABLE_USERS);
+        LOGGER.debug("create table: " + TABLE_USERS);
         String sql = " CREATE TABLE " + TABLE_USERS + "(" + UserBot.getFieldCreate() + " );";
         executeSql(sql);
         sql = "CREATE UNIQUE INDEX idx_" + TABLE_USERS + "_user ON " + TABLE_USERS + " (user_id);";
@@ -50,7 +53,7 @@ public class TUsers {
             ps.setLong(1, user.userId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                System.out.println(rs.getLong(UserBot.USER_ID) + "\t" +
+                LOGGER.debug(rs.getLong(UserBot.USER_ID) + "\t" +
                         rs.getString(UserBot.FIRSTNAME) + "\t");
             } else {
                 addUser(user);
@@ -78,7 +81,7 @@ public class TUsers {
             ps.setString(4, user.lastName);
             ps.setString(5, user.userName);
             int numRowsInserted = ps.executeUpdate();
-            System.out.println("numRowsInserted:" + numRowsInserted);
+            LOGGER.debug("numRowsInserted:" + numRowsInserted);
         } catch (SQLException ex) {
             logException(ex);
         }
@@ -127,7 +130,7 @@ public class TUsers {
         userBot.wallet = rs.getString(UserBot.WALLET);
         userBot.address = rs.getString(UserBot.ADDRESS);
         userBot.password = rs.getString(UserBot.PASSWORD);
-        System.out.println(rs.getLong(UserBot.USER_ID) + "\t" +
+        LOGGER.debug(rs.getLong(UserBot.USER_ID) + "\t" +
                 rs.getString(UserBot.FIRSTNAME) + "\t");
     }
 
@@ -140,7 +143,7 @@ public class TUsers {
             ps.setString(1, user.wallet);
             ps.setLong(2, user.userId);
             int numRowsUpdate = ps.executeUpdate();
-            System.out.println("updateWallet:" + numRowsUpdate);
+            LOGGER.debug("updateWallet:" + numRowsUpdate);
         } catch (SQLException ex) {
             logException(ex);
         }
@@ -155,7 +158,7 @@ public class TUsers {
             ps.setString(1, user.address);
             ps.setLong(2, user.userId);
             int numRowsUpdate = ps.executeUpdate();
-            System.out.println("updateAddress:" + numRowsUpdate);
+            LOGGER.debug("updateAddress:" + numRowsUpdate);
         } catch (SQLException ex) {
             logException(ex);
         }
@@ -170,7 +173,7 @@ public class TUsers {
             ps.setString(1, user.password);
             ps.setLong(2, user.userId);
             int numRowsUpdate = ps.executeUpdate();
-            System.out.println("updatePassword:" + numRowsUpdate);
+            LOGGER.debug("updatePassword:" + numRowsUpdate);
         } catch (SQLException ex) {
             logException(ex);
         }
@@ -185,7 +188,7 @@ public class TUsers {
             ps.setLong(1, user.messageId);
             ps.setLong(2, user.userId);
             int numRowsUpdate = ps.executeUpdate();
-            System.out.println("updatePassword:" + numRowsUpdate);
+            LOGGER.debug("setMessage update:" + numRowsUpdate);
         } catch (SQLException ex) {
             logException(ex);
         }
@@ -205,7 +208,7 @@ public class TUsers {
             ps.setLong(3, user.verify);
             ps.setLong(4, user.userId);
             int numRowsUpdate = ps.executeUpdate();
-            System.out.println("updateVerify:" + numRowsUpdate);
+            LOGGER.debug("updateVerify:" + numRowsUpdate);
         } catch (SQLException ex) {
             logException(ex);
         }
@@ -218,8 +221,8 @@ public class TUsers {
         try {
             PreparedStatement ps = mConnection.prepareStatement(sql);
             ps.setLong(1, userId);
-            int numRowsUpdate = ps.executeUpdate();
-            System.out.println("removeUser:" + numRowsUpdate);
+            int numRows = ps.executeUpdate();
+            LOGGER.debug("removeUser:" + numRows);
         } catch (SQLException ex) {
             logException(ex);
         }

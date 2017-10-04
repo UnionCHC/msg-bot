@@ -2,6 +2,8 @@ package com.desprice.unionchc.sqlite;
 
 
 import com.desprice.unionchc.Options;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 
@@ -9,6 +11,7 @@ import static com.desprice.unionchc.Utils.logException;
 
 public class SQLite {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SQLite.class);
 
     private static SQLite ourInstance = new SQLite();
 
@@ -34,12 +37,12 @@ public class SQLite {
 
             mConnection = DriverManager.getConnection(dbURL);
             if (mConnection != null) {
-                System.out.println("Connected to the database");
+                LOGGER.debug("Connected to the database");
                 DatabaseMetaData dm = mConnection.getMetaData();
-                System.out.println("Driver name: " + dm.getDriverName());
-                System.out.println("Driver version: " + dm.getDriverVersion());
-                System.out.println("Product name: " + dm.getDatabaseProductName());
-                System.out.println("Product version: " + dm.getDatabaseProductVersion());
+                LOGGER.debug("Driver name: " + dm.getDriverName());
+                LOGGER.debug("Driver version: " + dm.getDriverVersion());
+                LOGGER.debug("Product name: " + dm.getDatabaseProductName());
+                LOGGER.debug("Product version: " + dm.getDatabaseProductVersion());
             }
         } catch (ClassNotFoundException | SQLException ex) {
             logException(ex);

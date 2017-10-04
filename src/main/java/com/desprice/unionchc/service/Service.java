@@ -1,7 +1,7 @@
 package com.desprice.unionchc.service;
 
 
-import com.desprice.unionchc.EthereumSer;
+import com.desprice.unionchc.EthereumWeb3j;
 import com.desprice.unionchc.Options;
 import com.desprice.unionchc.entity.Config;
 import com.desprice.unionchc.sqlite.SQLite;
@@ -59,7 +59,7 @@ public class Service implements Daemon {
             HttpHandler httpHandler = new CLStaticHttpHandler(HttpServer.class.getClassLoader(), "/web/", "/html/");
             mServer.getServerConfiguration().addHttpHandler(httpHandler, "/res");
 
-            System.out.println(uri.toString());
+            LOGGER.debug(uri.toString());
 
 
             Runtime.getRuntime().addShutdownHook(new Thread(mServer::shutdownNow));
@@ -69,7 +69,7 @@ public class Service implements Daemon {
             SQLite sqlite = SQLite.getInstance();
             sqlite.checkTables();
             BotTelegram.init();
-            EthereumSer.getInstance().setSubscribe(Options.getInstance().getAddress(), Options.getInstance().getContract());
+            EthereumWeb3j.getInstance().setSubscribe(Options.getInstance().getAddress(), Options.getInstance().getContract());
 
 
         } catch (IOException ex) {
@@ -82,7 +82,7 @@ public class Service implements Daemon {
 
     @Override
     public void stop() throws Exception {
-        EthereumSer.getInstance().unSubscribe();
+        EthereumWeb3j.getInstance().unSubscribe();
         SQLite.getInstance().closeConnection();
         if (mServer != null) {
             mServer.shutdown();
@@ -92,7 +92,7 @@ public class Service implements Daemon {
 
     @Override
     public void destroy() {
-        EthereumSer.getInstance().unSubscribe();
+        EthereumWeb3j.getInstance().unSubscribe();
         SQLite.getInstance().closeConnection();
         if (mServer != null) {
             mServer.shutdown();

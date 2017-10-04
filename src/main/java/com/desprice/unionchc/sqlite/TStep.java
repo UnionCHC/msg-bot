@@ -1,6 +1,8 @@
 package com.desprice.unionchc.sqlite;
 
 import com.desprice.unionchc.entity.UserStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,6 +13,7 @@ import static com.desprice.unionchc.Utils.logException;
 
 public class TStep {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(TStep.class);
 
     private static TStep ourInstance = new TStep();
 
@@ -34,7 +37,7 @@ public class TStep {
     }
 
     private void createTable() {
-        System.out.println("create table: " + TABLE_STEP);
+        LOGGER.debug("create table: " + TABLE_STEP);
         String sql = " CREATE TABLE " + TABLE_STEP + "(" + UserStep.getFieldCreate() + " );";
         executeSql(sql);
         sql = "CREATE UNIQUE INDEX idx_" + TABLE_STEP + "_user_bot ON " + TABLE_STEP + " (" + UserStep.USER_ID + " , " + UserStep.BOT_ID + ");";
@@ -60,8 +63,8 @@ public class TStep {
             ps.setInt(2, step.botId);
             ps.setInt(3, step.step);
             ps.setLong(4, step.value);
-            int numRowsInserted = ps.executeUpdate();
-            System.out.println("updateStep numRowsInserted:" + numRowsInserted);
+            int numRows = ps.executeUpdate();
+            LOGGER.debug("updateStep numRows:" + numRows);
         } catch (SQLException ex) {
             logException(ex);
         }
@@ -82,7 +85,7 @@ public class TStep {
             if (rs.next()) {
                 userStep.step = rs.getInt(UserStep.STEP);
                 userStep.value = rs.getLong(UserStep.VALUE);
-                System.out.println("getStep: " + userStep.step);
+                LOGGER.debug("getStep: " + userStep.step);
             }
 
         } catch (SQLException ex) {

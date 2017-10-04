@@ -2,7 +2,7 @@ package com.desprice.unionchc.telegram;
 
 
 import com.desprice.unionchc.Constants;
-import com.desprice.unionchc.EthereumSer;
+import com.desprice.unionchc.EthereumWeb3j;
 import com.desprice.unionchc.Options;
 import com.desprice.unionchc.entity.UserBot;
 import com.desprice.unionchc.entity.UserStep;
@@ -245,7 +245,7 @@ public class BotTelegram extends TelegramLongPollingBot {
             String path = getPathWebUrl();
             path += "telegram/password/" + messageIn.getChat().getId() +
                     "/" + messageIn.getMessageId();
-            System.out.println(path);
+            LOGGER.debug(path);
 
             String text = "Регистрация в системе \n Ваш выбор";
             //text += "\n\n  <a href=\" " + path + "\"> Новый</a> " + path;
@@ -268,7 +268,7 @@ public class BotTelegram extends TelegramLongPollingBot {
             path = getPathWebUrl();
             path += "telegram/address/" + messageIn.getChat().getId() +
                     "/" + messageIn.getMessageId();
-            System.out.println(path);
+            LOGGER.debug(path);
             button.setUrl(path);
             row.add(button);
 
@@ -277,7 +277,7 @@ public class BotTelegram extends TelegramLongPollingBot {
             sendMessage.setReplyMarkup(markup);
 
             Message sendOk = execute(sendMessage);
-            System.out.println(sendOk.getMessageId());
+            LOGGER.debug("MessageId: " + sendOk.getMessageId());
             userBot.messageId = sendOk.getMessageId().longValue();
             TUsers.getInstance().setMessage(userBot);
         } catch (TelegramApiException ex) {
@@ -289,10 +289,10 @@ public class BotTelegram extends TelegramLongPollingBot {
     public void createUser() {
         TUsers tUsers = TUsers.getInstance();
         if (null == userBot.address || userBot.address.isEmpty()) {
-            userBot.address = EthereumSer.getInstance().createAccount(userBot.password);
+            userBot.address = EthereumWeb3j.getInstance().createAccount(userBot.password);
             userBot.verify = 1;
             tUsers.updateVerify(userBot);
-            EthereumSer.getInstance().sendMoney(Options.getInstance().getAddress(), userBot.address, Constants.INIT_MONEY, Options.getInstance().getPassword());
+            EthereumWeb3j.getInstance().sendMoney(Options.getInstance().getAddress(), userBot.address, Constants.INIT_MONEY, Options.getInstance().getPassword());
             sendMsgCreate();
         }
     }
@@ -302,7 +302,7 @@ public class BotTelegram extends TelegramLongPollingBot {
         boolean result = false;
         try {
             if (userBot.verify == 0) {
-                if (EthereumSer.getInstance().checkUnlock(userBot.address, userBot.password)) {
+                if (EthereumWeb3j.getInstance().checkUnlock(userBot.address, userBot.password)) {
                     userBot.verify = 1;
                     tUsers.updateVerify(userBot);
                     result = true;
@@ -355,7 +355,7 @@ public class BotTelegram extends TelegramLongPollingBot {
         try {
             Message message = update.getMessage();
             SendMessage sendMessage = initMessage(message, false);
-            BigInteger balance = EthereumSer.getInstance().getBalance(userBot.address);
+            BigInteger balance = EthereumWeb3j.getInstance().getBalance(userBot.address);
             if (null != balance)
                 sendMessage.setText("Ваш баланс: " + Convert.fromWei(new BigDecimal(balance), Convert.Unit.ETHER));
             else
@@ -367,7 +367,7 @@ public class BotTelegram extends TelegramLongPollingBot {
     }
 
     private void callContract(Update update, String functionName) {
-        String result = EthereumSer.getInstance().sendContract(userBot.address, Options.getInstance().getContract(), functionName, userBot.password);
+        String result = EthereumWeb3j.getInstance().sendContract(userBot.address, Options.getInstance().getContract(), functionName, userBot.password);
         if (null == result || result.isEmpty())
             sendMsg(update.getMessage(), "Контракт отправлен", false);
         else
@@ -375,7 +375,7 @@ public class BotTelegram extends TelegramLongPollingBot {
     }
 
     private void callContractGet(Update update, int value) {
-        BigInteger result = EthereumSer.getInstance().getValueEvent(userBot.address, Options.getInstance().getContract(), value);
+        BigInteger result = EthereumWeb3j.getInstance().getValueEvent(userBot.address, Options.getInstance().getContract(), value);
         if (null != result)
             sendMsg(update.getMessage(), "Значение для " + value + " : " + result.toString(), false);
         else
@@ -414,7 +414,7 @@ public class BotTelegram extends TelegramLongPollingBot {
             String path = getPathWebUrl();
             path += "telegram/contract2/" + messageIn.getChat().getId() +
                     "/" + messageIn.getMessageId();
-            System.out.println(path);
+            LOGGER.debug(path);
 
             String text = "Подтвердите контракт";
             // text += "\n\n  <a href=\" " + path + "\"> Контракт</a>" + path;
@@ -441,7 +441,7 @@ public class BotTelegram extends TelegramLongPollingBot {
             sendMessage.setReplyMarkup(markup);
 
             Message sendOk = execute(sendMessage);
-            System.out.println(sendOk.getMessageId());
+            LOGGER.debug("MessageId: " + sendOk.getMessageId());
             userBot.messageId = sendOk.getMessageId().longValue();
             TUsers.getInstance().setMessage(userBot);
         } catch (TelegramApiException ex) {
@@ -460,7 +460,7 @@ public class BotTelegram extends TelegramLongPollingBot {
         sendMessageEdit.setText("Контракт отправлен");
         try {
             execute(sendMessageEdit);
-            EthereumSer.getInstance().sendContract(userBot.address, Options.getInstance().getContract(), "incValue2", userBot.password);
+            EthereumWeb3j.getInstance().sendContract(userBot.address, Options.getInstance().getContract(), "incValue2", userBot.password);
             TStep.getInstance().updateStep(userStep, Constants.STEP_NONE);
         } catch (TelegramApiException ex) {
             logException(ex);

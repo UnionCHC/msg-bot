@@ -32,9 +32,9 @@ import java.util.concurrent.Future;
 
 import static com.desprice.unionchc.Utils.logException;
 
-public class EthereumSer {
+public class EthereumWeb3j {
 
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(EthereumSer.class);
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(EthereumWeb3j.class);
 
     private static final BigInteger GAS_PRICE = BigInteger.valueOf(20_000_000_000L);
 
@@ -43,15 +43,15 @@ public class EthereumSer {
     private Web3j mWeb3;
     private Parity mParity;
 
-    private static EthereumSer ourInstance = new EthereumSer();
+    private static EthereumWeb3j ourInstance = new EthereumWeb3j();
 
     private Subscription mSubscription;
 
-    public static EthereumSer getInstance() {
+    public static EthereumWeb3j getInstance() {
         return ourInstance;
     }
 
-    private EthereumSer() {
+    private EthereumWeb3j() {
         init();
     }
 
